@@ -2,27 +2,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using Player.Ability;
 using Unity.VisualScripting;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
-public class Movement : MonoBehaviour
-{
+public class Movement : MonoBehaviour {
     
     public float doubleTapWindow = 0.5f;
-    public float dashCooldown = 2f;
 
-    public float dashVelocity = 25f;
+    public Dash dash;
 
-    private Vector3 dashDirection = Vector3.zero;
-    private bool wantDash = false;
-    private float lastDash = 0f;
     private KeyCode lastPressed = KeyCode.W;
 
     private KeyCode[] movementKeys = { KeyCode.W, KeyCode.D, KeyCode.S, KeyCode.A };
     
-    //TODO: rework to dictionary on key->KeyCode
-    private Dictionary<KeyCode, KeyInfo> _keyInfo= new Dictionary<KeyCode, KeyInfo>();
+    private readonly Dictionary<KeyCode, KeyInfo> _keyInfo= new ();
 
     // Start is called before the first frame update
     void Start() {
@@ -43,14 +38,7 @@ public class Movement : MonoBehaviour
         foreach (KeyCode key in movementKeys) {
             HeldKeyMove(key, 0.1f);
         }
-        if (wantDash) {
-            Dash();
-            wantDash = false;
-        }
-    }
-
-    private void Dash() {
-        transform.position += dashDirection * dashVelocity;
+        dash.Trigger();
     }
     
     private static Vector3 GetDirection(KeyCode keyCode) {
@@ -72,11 +60,9 @@ public class Movement : MonoBehaviour
         if (Input.GetKeyDown(keyCode)) {
             KeyInfo keyInfo = _keyInfo[keyCode];
             float currentTime = Time.time;
-            if (currentTime - keyInfo.Timestamp <= doubleTapWindow &&
-                currentTime - lastDash >= dashCooldown && lastPressed == keyCode) {
-                wantDash = true;
-                dashDirection = GetDirection(keyCode);
-                lastDash = currentTime;
+            if (currentTime - keyInfo.Timestamp <= doubleTapWindow && lastPressed == keyCode) {
+                dash.direction = GetDirection(keyCode);
+                dash.Arm();
             }
             keyInfo.Update();
             lastPressed = keyCode;
