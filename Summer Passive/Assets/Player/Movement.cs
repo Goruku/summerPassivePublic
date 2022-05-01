@@ -21,16 +21,14 @@ public class Movement : MonoBehaviour
 
     private KeyCode[] movementKeys = { KeyCode.W, KeyCode.D, KeyCode.S, KeyCode.A };
     
-    private KeyTimeStamp[] _timeStamps = {
-        new (KeyCode.W, 0f),
-        new (KeyCode.D, 0f),
-        new (KeyCode.S, 0f),
-        new (KeyCode.A, 0f)
-    };
+    //TODO: rework to dictionary on key->KeyCode
+    private Dictionary<KeyCode, KeyInfo> _keyInfo= new Dictionary<KeyCode, KeyInfo>();
 
     // Start is called before the first frame update
     void Start() {
-        
+        foreach (KeyCode key in movementKeys) {
+            _keyInfo.Add(key, new KeyInfo(0));
+        }
     }
 
     // Update is called once per frame
@@ -55,25 +53,14 @@ public class Movement : MonoBehaviour
         transform.position += dashDirection * dashVelocity;
     }
     
-    private Vector3 GetDirection(KeyCode keyCode) {
-        switch (keyCode)
-        {
-            case KeyCode.W: return Vector3.up;
-            case KeyCode.D: return Vector3.right;
-            case KeyCode.S: return Vector3.down;
-            case KeyCode.A: return Vector3.left;
-            default: return Vector3.zero;
-        }
-    }
-
-    private KeyTimeStamp GetTimeStamp(KeyCode keyCode) {
-        switch (keyCode) {
-            case KeyCode.W: return _timeStamps[0];
-            case KeyCode.D: return _timeStamps[1];
-            case KeyCode.S: return _timeStamps[2];
-            case KeyCode.A: return _timeStamps[3];
-            default: return _timeStamps[0];
-        }
+    private static Vector3 GetDirection(KeyCode keyCode) {
+        return keyCode switch {
+            KeyCode.W => Vector3.up,
+            KeyCode.D => Vector3.right,
+            KeyCode.S => Vector3.down,
+            KeyCode.A => Vector3.left,
+            _ => Vector3.zero
+        };
     }
 
     private void HeldKeyMove(KeyCode keyCode, float magnitude) {
@@ -83,30 +70,28 @@ public class Movement : MonoBehaviour
 
     private void DetectDashInput(KeyCode keyCode) {
         if (Input.GetKeyDown(keyCode)) {
+            KeyInfo keyInfo = _keyInfo[keyCode];
             float currentTime = Time.time;
-            if (currentTime - GetTimeStamp(keyCode).Timestamp <= doubleTapWindow &&
+            if (currentTime - keyInfo.Timestamp <= doubleTapWindow &&
                 currentTime - lastDash >= dashCooldown && lastPressed == keyCode) {
                 wantDash = true;
                 dashDirection = GetDirection(keyCode);
-                Debug.Log("Dash dectected");
                 lastDash = currentTime;
             }
-            GetTimeStamp(keyCode).Update();
+            keyInfo.Update();
             lastPressed = keyCode;
         }
     }
     
-    private class KeyTimeStamp {
-        public KeyCode Key;
+    private class KeyInfo {
         public float Timestamp;
 
-        public KeyTimeStamp(KeyCode key, float time) {
-            this.Key = key;
+        public KeyInfo(float time) {
             this.Timestamp = time;
         }
 
         public void Update() {
-            this.Timestamp = Time.time;
+            Timestamp = Time.time;
         }
     }
 
