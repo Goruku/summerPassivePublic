@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Player;
 using Player.Ability;
 using UnityEngine;
@@ -9,7 +10,7 @@ public class Movement : MonoBehaviour {
 
     public Dash dash;
 
-    private KeyCode lastPressed = KeyCode.W;
+    public float moveSpeed;
 
     // Start is called before the first frame update
     void Start() {
@@ -28,8 +29,8 @@ public class Movement : MonoBehaviour {
 
     private void FixedUpdate() {
         //General movement
-        foreach (KeyInfo keyInfo in keyManager.movementKeys) {
-            Move(keyInfo.held, keyInfo.direction, 0.1f);
+        foreach (var keyInfo in keyManager.movementKeys) {
+            Move(keyInfo.held, keyInfo.direction, moveSpeed);
         }
         dash.Trigger();
     }

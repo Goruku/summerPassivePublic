@@ -27,7 +27,7 @@ namespace Player {
             } else {
                 down = false;
             }
-            doubleTap = Time.time - lastTimestamp < doubleTapWindow;
+            doubleTap = Time.time - lastTimestamp < doubleTapWindow && down;
             held = Input.GetKey(keyCode);
             up = Input.GetKeyUp(keyCode);
         }
