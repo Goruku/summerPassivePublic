@@ -20,8 +20,8 @@ public class Movement : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         foreach (KeyInfo keyInfo in keyManager.movementKeys) {
-            if (keyInfo.doubleTap) {
-                dash.direction = keyInfo.direction;
+            if (keyInfo.doubleTap || (keyManager.movementCombo.held && keyInfo.held)) {
+                dash.shiftDirection(keyInfo.direction);
                 dash.Arm();
             }
         }
