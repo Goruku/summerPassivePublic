@@ -7,21 +7,20 @@ namespace Passive {
     public class PassivePoint : MonoBehaviour {
         public PassiveTree passiveTree;
         private Button _associatedButton;
+        public List<PassivePoint> mandatoryTo;
+        public List<PassivePoint> linked;
+
         public List<PassivePoint> mandatory;
-        public List<PassivePoint> parents;
-        public List<PassivePoint> children;
+        
         public bool allocated;
         public bool root;
-
-        private bool propagated;
 
         // Start is called before the first frame update
         void Start() {
             _associatedButton = GetComponent<Button>();
             _associatedButton.onClick.AddListener(Toggle);
-
-            if (root) {
-                Propagate();
+            foreach (PassivePoint childPoints in mandatoryTo) {
+                childPoints.mandatory.Add(this);
             }
         }
 
@@ -51,7 +50,7 @@ namespace Passive {
         }
 
         public bool Unallocate() {
-            if (!CheckDependency()) return false;
+            if (!CheckIfSafeRemove()) return false;
             allocated = false;
             var colors = _associatedButton.colors;
             colors.normalColor = Color.white;
@@ -59,43 +58,42 @@ namespace Passive {
             _associatedButton.colors = colors;
             return allocated;
         }
-
-        private void Propagate() {
-            if (!propagated)
-                foreach (PassivePoint child in children) {
-                    child.parents.Add(this);
-                    child.Propagate();
-                }
-            propagated = true;
-        }
-
+        
         public bool CheckAvailability() {
-            bool fulfilled = false;
-            foreach (var linkedPoint in parents) {
-                fulfilled |= linkedPoint.allocated;
+            bool available = false;
+            foreach (var linkedPoint in linked) {
+                available |= linkedPoint.allocated;
             }
             foreach (var mandatoryPoint in mandatory) {
-                fulfilled &= mandatoryPoint.allocated;
+                available &= mandatoryPoint.allocated;
             }
-            return fulfilled;
+            return available;
         }
-
-        public bool CheckDependency() {
-            if (root) return false;
-            foreach (PassivePoint child in children) {
-                if (child.allocated) {
-                    foreach (PassivePoint mandatory in child.mandatory) {
-                        if (mandatory.Equals(this)) return false;
-                    }
-                    bool hasValidParent = false;
-                    foreach (PassivePoint parent in child.parents) {
-                        if (!parent.Equals(this) && parent.allocated)
-                            hasValidParent = true;
-                    }
-                    if (!hasValidParent) return false;
-                }
+        private bool CheckIfSafeRemove() {
+            foreach (PassivePoint mandatedPoint in mandatoryTo) {
+                if (mandatedPoint.allocated) return false;
+            }
+            Dictionary<int, PassivePoint> searchPoints = new ();
+            foreach (PassivePoint childPoint in linked) {
+                searchPoints.Clear();
+                searchPoints.Add(GetInstanceID(), this);
+                if (childPoint.allocated && !ReachesRoot(childPoint, searchPoints)) return false;
             }
             return true;
+        }
+
+        private bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, PassivePoint> searchPoints) {
+            if (passivePoint.root) return true;
+            if (searchPoints.ContainsKey(passivePoint.GetInstanceID())) return false;
+            searchPoints.Add(passivePoint.GetInstanceID(), passivePoint);
+            bool reachesRoot = false;
+            foreach (PassivePoint childPoint in passivePoint.linked) {
+                if (childPoint.allocated && ReachesRoot(childPoint, searchPoints)) {
+                    reachesRoot = true;
+                    break;
+                }
+            }
+            return reachesRoot;
         }
     }
 }
