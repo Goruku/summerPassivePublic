@@ -73,27 +73,24 @@ namespace Passive {
             foreach (PassivePoint mandatedPoint in mandatoryTo) {
                 if (mandatedPoint.allocated) return false;
             }
-            Dictionary<int, PassivePoint> searchPoints = new ();
+            Dictionary<int, bool> searchedPoints = new () {{ GetInstanceID(), false}};
             foreach (PassivePoint childPoint in linked) {
-                searchPoints.Clear();
-                searchPoints.Add(GetInstanceID(), this);
-                if (childPoint.allocated && !ReachesRoot(childPoint, searchPoints)) return false;
+                if (childPoint.allocated && !ReachesRoot(childPoint, searchedPoints)) return false;
             }
             return true;
         }
 
-        private bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, PassivePoint> searchPoints) {
+        private bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, bool> searchedPoints) {
             if (passivePoint.root) return true;
-            if (searchPoints.ContainsKey(passivePoint.GetInstanceID())) return false;
-            searchPoints.Add(passivePoint.GetInstanceID(), passivePoint);
-            bool reachesRoot = false;
+            if (searchedPoints.TryGetValue(passivePoint.GetInstanceID(), out var canReach)) return canReach;
+            
+            searchedPoints.Add(passivePoint.GetInstanceID(), false);
             foreach (PassivePoint childPoint in passivePoint.linked) {
-                if (childPoint.allocated && ReachesRoot(childPoint, searchPoints)) {
-                    reachesRoot = true;
-                    break;
-                }
+                if (!childPoint.allocated || !ReachesRoot(childPoint, searchedPoints)) continue;
+                searchedPoints[passivePoint.GetInstanceID()] = true;
+                break;
             }
-            return reachesRoot;
+            return searchedPoints[passivePoint.GetInstanceID()];
         }
     }
 }
