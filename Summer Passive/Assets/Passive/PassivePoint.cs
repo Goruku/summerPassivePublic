@@ -60,6 +60,7 @@ namespace Passive {
         }
         
         public bool CheckAvailability() {
+            if (root) return true;
             bool available = false;
             foreach (var linkedPoint in linked) {
                 available |= linkedPoint.allocated;
@@ -81,8 +82,8 @@ namespace Passive {
         }
 
         private bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, bool> searchedPoints) {
-            if (passivePoint.root) return true;
             if (searchedPoints.TryGetValue(passivePoint.GetInstanceID(), out var canReach)) return canReach;
+            if (passivePoint.root) return true;
             
             searchedPoints.Add(passivePoint.GetInstanceID(), false);
             foreach (PassivePoint childPoint in passivePoint.linked) {
