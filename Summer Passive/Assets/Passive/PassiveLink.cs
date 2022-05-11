@@ -10,7 +10,7 @@ namespace Passive {
         public PassivePoint left;
         public PassivePoint right;
         public LinkState linkState;
-        public LinkDirection mandatory;
+        public LinkDirection mandatoryDirection;
 
         // Start is called before the first frame update
         void Start() { }
@@ -24,12 +24,15 @@ namespace Passive {
         }
 
         private LinkState ComputeState() {
-            if (!left.allocated && !right.allocated) return LinkState.Unavailable;
-            if (left.allocated && right.allocated) return LinkState.Taken;
-            if (mandatory == LinkDirection.None) return LinkState.Available;
-            if ((mandatory == LinkDirection.Left && left.allocated) ||
-                (mandatory == LinkDirection.Right && right.allocated)) return LinkState.Mandates;
-            return LinkState.Mandated;
+            return mandatoryDirection switch {
+                LinkDirection.None when left.allocated != right.allocated => LinkState.Available,
+                LinkDirection.Left when !left.allocated => LinkState.Mandated,
+                LinkDirection.Right when !right.allocated => LinkState.Mandated,
+                LinkDirection.Left when left.allocated => LinkState.Mandates,
+                LinkDirection.Right when right.allocated => LinkState.Mandates,
+                _ when left.allocated && right.allocated => LinkState.Taken,
+                _ => LinkState.Unavailable
+            };
         }
 
         public LinkDirection GetSide(PassivePoint point) {
@@ -43,11 +46,11 @@ namespace Passive {
         }
 
         public bool IsMandatory(PassivePoint point) {
-            return GetSide(point) == mandatory;
+            return GetSide(point) == mandatoryDirection;
         }
 
         public bool IsDependant(PassivePoint point) {
-            return GetSide(point).Flip() == mandatory;
+            return GetSide(point).Flip() == mandatoryDirection;
         }
 
     }
