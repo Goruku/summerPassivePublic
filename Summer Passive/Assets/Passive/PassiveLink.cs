@@ -23,6 +23,18 @@ namespace Passive {
             GetComponent<RawImage>().color = linkState.Color();
         }
 
+        public void UpdateDimension() {
+            var linkShape = GetComponent<RectTransform>();
+            var leftPosition = left.GetComponent<RectTransform>().anchoredPosition3D;
+            var rightPosition = right.GetComponent<RectTransform>().anchoredPosition3D;
+            linkShape.position = (rightPosition - leftPosition) * 0.5f;
+            linkShape.rotation = Quaternion.Euler(0, 0, MathF.Atan2(rightPosition.y - leftPosition.y, rightPosition.x - leftPosition.x) * Mathf.Rad2Deg);
+            linkShape.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 10);
+            linkShape.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                Vector3.Distance(rightPosition, leftPosition));
+            linkShape.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
+        }
+
         private LinkState ComputeState() {
             return mandatoryDirection switch {
                 LinkDirection.None when left.allocated != right.allocated => LinkState.Available,
