@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace KeyManagement {
     public class KeyManager : MonoBehaviour {
-        private readonly Dictionary<KeyCode, KeyInfo> _keyInfo;
+        private readonly Dictionary<KeyCode, KeyInfo> _keyInfo = new ();
 
         public List<KeyInfo> movementKeys;
 

@@ -12,10 +12,7 @@ public class PassiveTree : MonoBehaviour {
     // Start is called before the first frame update
     void Start()
     {
-        foreach (var passiveLink in PassiveLinks) {
-            passivePoints[passiveLink.id0].linked.Add(passivePoints[passiveLink.id1]);
-            passivePoints[passiveLink.id1].linked.Add(passivePoints[passiveLink.id0]);
-        }
+
     }
 
     // Update is called once per frame
@@ -24,9 +21,4 @@ public class PassiveTree : MonoBehaviour {
         
     }
 
-    [System.Serializable]
-    public struct PassiveLink {
-        public int id0;
-        public int id1;
-    }
 }

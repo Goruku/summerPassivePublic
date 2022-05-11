@@ -149,7 +149,6 @@ GameObject:
   - component: {fileID: 4267978073157769873}
   - component: {fileID: 4267978073157769874}
   - component: {fileID: 4267978073157769875}
-  - component: {fileID: 4267978073157769877}
   m_Layer: 5
   m_Name: Passive Root
   m_TagString: Untagged
@@ -261,17 +260,17 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 4267978073157769875}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+        m_TargetAssemblyTypeName: Passive.PassivePoint, Assembly-CSharp
+        m_MethodName: Toggle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 2
+        m_CallState: 1
 --- !u!114 &4267978073157769874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,22 +301,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   passiveTree: {fileID: 0}
-  mandatoryTo: []
-  linked: []
-  mandatory: []
+  links: []
   allocated: 1
   root: 1
---- !u!114 &4267978073157769877
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4267978073157769884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52d414239b7937e40bc8f9696c504688, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  passivePoints: []
-  PassiveLinks: []

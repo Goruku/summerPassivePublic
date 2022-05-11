@@ -6,22 +6,14 @@ using UnityEngine.UI;
 namespace Passive {
     public class PassivePoint : MonoBehaviour {
         public PassiveTree passiveTree;
-        private Button _associatedButton;
-        public List<PassivePoint> mandatoryTo;
-        public List<PassivePoint> linked;
+        public List<PassiveLink> links;
 
-        public List<PassivePoint> mandatory;
-        
         public bool allocated;
         public bool root;
 
         // Start is called before the first frame update
         void Start() {
-            _associatedButton = GetComponent<Button>();
-            _associatedButton.onClick.AddListener(Toggle);
-            foreach (PassivePoint childPoints in mandatoryTo) {
-                childPoints.mandatory.Add(this);
-            }
+
         }
 
         // Update is called once per frame
@@ -42,51 +34,60 @@ namespace Passive {
         public bool Allocate() {
             if (!CheckAvailability()) return false;
             allocated = true;
-            var colors = _associatedButton.colors;
+            var passiveButton = GetComponent<Button>();
+            var colors = passiveButton.colors;
             colors.normalColor = Color.yellow;
             colors.selectedColor = Color.yellow;
-            _associatedButton.colors = colors;
+            passiveButton.colors = colors;
+            UpdateLinks();
             return allocated;
         }
 
         public bool Unallocate() {
             if (!CheckIfSafeRemove()) return false;
             allocated = false;
-            var colors = _associatedButton.colors;
+            var passiveButton = GetComponent<Button>();
+            var colors = passiveButton.colors;
             colors.normalColor = Color.white;
             colors.selectedColor = Color.white;
-            _associatedButton.colors = colors;
+            passiveButton.colors = colors;
+            UpdateLinks();
             return allocated;
+        }
+
+        private void UpdateLinks() {
+            foreach (PassiveLink link in links) {
+                link.UpdateState();
+            }
         }
         
         public bool CheckAvailability() {
             if (root) return true;
             bool available = false;
-            foreach (var linkedPoint in linked) {
-                available |= linkedPoint.allocated;
-            }
-            foreach (var mandatoryPoint in mandatory) {
-                available &= mandatoryPoint.allocated;
+            foreach (var link in links) {
+                var linkAllocated = link.GetLinkedPoint(this).allocated;
+                if (link.IsDependant(this) && !linkAllocated) return false;
+                available |= linkAllocated;
             }
             return available;
         }
         private bool CheckIfSafeRemove() {
-            foreach (PassivePoint mandatedPoint in mandatoryTo) {
-                if (mandatedPoint.allocated) return false;
-            }
             Dictionary<int, bool> searchedPoints = new () {{ GetInstanceID(), false}};
-            foreach (PassivePoint childPoint in linked) {
-                if (childPoint.allocated && !ReachesRoot(childPoint, searchedPoints)) return false;
+            foreach (PassiveLink link in links) {
+                PassivePoint childPoint = link.GetLinkedPoint(this);
+                if (!childPoint.allocated) continue;
+                if (link.IsMandatory(this) || !ReachesRoot(childPoint, searchedPoints)) return false;
             }
             return true;
         }
 
-        private bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, bool> searchedPoints) {
+        private static bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, bool> searchedPoints) {
             if (searchedPoints.TryGetValue(passivePoint.GetInstanceID(), out var canReach)) return canReach;
             if (passivePoint.root) return true;
             
             searchedPoints.Add(passivePoint.GetInstanceID(), false);
-            foreach (PassivePoint childPoint in passivePoint.linked) {
+            foreach (PassiveLink link in passivePoint.links) {
+                PassivePoint childPoint = link.GetLinkedPoint(passivePoint);
                 if (!childPoint.allocated || !ReachesRoot(childPoint, searchedPoints)) continue;
                 searchedPoints[passivePoint.GetInstanceID()] = true;
                 break;
