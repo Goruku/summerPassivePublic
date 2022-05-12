@@ -7,8 +7,8 @@ using UnityEngine.UI;
 namespace Passive {
     public class PassiveLink : MonoBehaviour {
 
-        public PassivePoint left;
-        public PassivePoint right;
+        public PassiveNode left;
+        public PassiveNode right;
         public LinkState linkState;
         public LinkDirection mandatoryDirection;
 
@@ -39,30 +39,30 @@ namespace Passive {
             return mandatoryDirection switch {
                 LinkDirection.None when left.allocated != right.allocated => LinkState.Available,
                 LinkDirection.Left when !left.allocated => LinkState.Mandated,
+                LinkDirection.Left => LinkState.Mandates,
                 LinkDirection.Right when !right.allocated => LinkState.Mandated,
-                LinkDirection.Left when left.allocated => LinkState.Mandates,
-                LinkDirection.Right when right.allocated => LinkState.Mandates,
+                LinkDirection.Right => LinkState.Mandates,
                 _ when left.allocated && right.allocated => LinkState.Taken,
                 _ => LinkState.Unavailable
             };
         }
 
-        public LinkDirection GetSide(PassivePoint point) {
-            if (point.GetInstanceID() == left.GetInstanceID()) return LinkDirection.Left;
+        public LinkDirection GetSide(PassiveNode node) {
+            if (node.GetInstanceID() == left.GetInstanceID()) return LinkDirection.Left;
             return LinkDirection.Right;
         }
 
-        public PassivePoint GetLinkedPoint(PassivePoint point) {
-            if (point.GetInstanceID() == left.GetInstanceID()) return right;
+        public PassiveNode GetLinkedPoint(PassiveNode node) {
+            if (node.GetInstanceID() == left.GetInstanceID()) return right;
             return left;
         }
 
-        public bool IsMandatory(PassivePoint point) {
-            return GetSide(point) == mandatoryDirection;
+        public bool IsMandatory(PassiveNode node) {
+            return GetSide(node) == mandatoryDirection;
         }
 
-        public bool IsDependant(PassivePoint point) {
-            return GetSide(point).Flip() == mandatoryDirection;
+        public bool IsDependant(PassiveNode node) {
+            return GetSide(node).Flip() == mandatoryDirection;
         }
 
     }

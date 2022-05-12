@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class PassiveTree : MonoBehaviour {
     
-    public  List<PassivePoint> passivePoints;
+    public  List<PassiveNode> passivePoints;
     public List<PassiveLink> PassiveLinks;
 
     // Start is called before the first frame update

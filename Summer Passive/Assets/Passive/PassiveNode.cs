@@ -4,7 +4,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Passive {
-    public class PassivePoint : MonoBehaviour {
+    public class PassiveNode : MonoBehaviour {
         public PassiveTree passiveTree;
         public List<PassiveLink> links;
 
@@ -34,11 +34,7 @@ namespace Passive {
         public bool Allocate() {
             if (!CheckAvailability()) return false;
             allocated = true;
-            var passiveButton = GetComponent<Button>();
-            var colors = passiveButton.colors;
-            colors.normalColor = Color.yellow;
-            colors.selectedColor = Color.yellow;
-            passiveButton.colors = colors;
+            UpdateState();
             UpdateLinks();
             return allocated;
         }
@@ -46,13 +42,25 @@ namespace Passive {
         public bool Unallocate() {
             if (!CheckIfSafeRemove()) return false;
             allocated = false;
-            var passiveButton = GetComponent<Button>();
-            var colors = passiveButton.colors;
-            colors.normalColor = Color.white;
-            colors.selectedColor = Color.white;
-            passiveButton.colors = colors;
+            UpdateState();
             UpdateLinks();
             return allocated;
+        }
+
+        public void UpdateState() {
+            var nodeState = ComputeState();
+            var passiveButton = GetComponent<Button>();
+            var colors = passiveButton.colors;
+            colors.normalColor = nodeState.Color();
+            colors.selectedColor = nodeState.Color();
+            passiveButton.colors = colors;
+        }
+
+        private NodeState ComputeState() {
+            return allocated switch {
+                true => NodeState.Allocated,
+                false => NodeState.UnAllocated
+            };
         }
 
         private void UpdateLinks() {
@@ -74,25 +82,40 @@ namespace Passive {
         private bool CheckIfSafeRemove() {
             Dictionary<int, bool> searchedPoints = new () {{ GetInstanceID(), false}};
             foreach (PassiveLink link in links) {
-                PassivePoint childPoint = link.GetLinkedPoint(this);
-                if (!childPoint.allocated) continue;
-                if (link.IsMandatory(this) || !ReachesRoot(childPoint, searchedPoints)) return false;
+                PassiveNode childNode = link.GetLinkedPoint(this);
+                if (!childNode.allocated) continue;
+                if (link.IsMandatory(this) || !ReachesRoot(childNode, searchedPoints)) return false;
             }
             return true;
         }
 
-        private static bool ReachesRoot(PassivePoint passivePoint, Dictionary<int, bool> searchedPoints) {
-            if (searchedPoints.TryGetValue(passivePoint.GetInstanceID(), out var canReach)) return canReach;
-            if (passivePoint.root) return true;
+        private static bool ReachesRoot(PassiveNode passiveNode, Dictionary<int, bool> searchedPoints) {
+            if (searchedPoints.TryGetValue(passiveNode.GetInstanceID(), out var canReach)) return canReach;
+            if (passiveNode.root) return true;
             
-            searchedPoints.Add(passivePoint.GetInstanceID(), false);
-            foreach (PassiveLink link in passivePoint.links) {
-                PassivePoint childPoint = link.GetLinkedPoint(passivePoint);
-                if (!childPoint.allocated || !ReachesRoot(childPoint, searchedPoints)) continue;
-                searchedPoints[passivePoint.GetInstanceID()] = true;
+            searchedPoints.Add(passiveNode.GetInstanceID(), false);
+            foreach (PassiveLink link in passiveNode.links) {
+                PassiveNode childNode = link.GetLinkedPoint(passiveNode);
+                if (!childNode.allocated || !ReachesRoot(childNode, searchedPoints)) continue;
+                searchedPoints[passiveNode.GetInstanceID()] = true;
                 break;
             }
-            return searchedPoints[passivePoint.GetInstanceID()];
+            return searchedPoints[passiveNode.GetInstanceID()];
+        }
+    }
+
+    public enum NodeState {
+        UnAllocated,
+        Allocated
+    }
+    
+    static class NodeEnumMethods {
+        public static Color Color(this NodeState nodeState) {
+            return nodeState switch {
+                NodeState.UnAllocated => UnityEngine.Color.white,
+                NodeState.Allocated => UnityEngine.Color.yellow,
+                _ => UnityEngine.Color.black
+            };
         }
     }
 }
