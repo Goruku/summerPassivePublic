@@ -10,7 +10,8 @@ namespace Passive {
         public PassiveNode left;
         public PassiveNode right;
         public LinkState linkState;
-        public LinkDirection mandatoryDirection;
+        public LinkDirection direction;
+        public bool mandatory;
 
         // Start is called before the first frame update
         void Start() { }
@@ -36,7 +37,7 @@ namespace Passive {
         }
 
         private LinkState ComputeState() {
-            return mandatoryDirection switch {
+            return direction switch {
                 LinkDirection.None when left.allocated != right.allocated => LinkState.Available,
                 LinkDirection.Left when !left.allocated => LinkState.Mandated,
                 LinkDirection.Left => LinkState.Mandates,
@@ -58,11 +59,11 @@ namespace Passive {
         }
 
         public bool IsMandatory(PassiveNode node) {
-            return GetSide(node) == mandatoryDirection;
+            return GetSide(node) == direction;
         }
 
         public bool IsDependant(PassiveNode node) {
-            return GetSide(node).Flip() == mandatoryDirection;
+            return GetSide(node).Flip() == direction;
         }
 
     }

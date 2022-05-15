@@ -304,3 +304,5 @@ MonoBehaviour:
   links: []
   allocated: 1
   root: 1
+  id: 0
+  text: Root

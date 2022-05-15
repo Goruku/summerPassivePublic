@@ -10,6 +10,8 @@ namespace Passive {
 
         public bool allocated;
         public bool root;
+        public int id;
+        public string text;
 
         // Start is called before the first frame update
         void Start() {

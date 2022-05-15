@@ -169,6 +169,8 @@ MonoBehaviour:
   links: []
   allocated: 0
   root: 0
+  id: 0
+  text: Point
 --- !u!1 &5930368226391283592
 GameObject:
   m_ObjectHideFlags: 0
