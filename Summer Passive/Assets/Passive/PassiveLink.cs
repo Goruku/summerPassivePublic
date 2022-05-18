@@ -35,17 +35,13 @@ namespace Passive {
                 Vector3.Distance(rightPosition, leftPosition));
             linkShape.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
         }
-
+        
         private LinkState ComputeState() {
-            return direction switch {
-                LinkDirection.None when left.allocated != right.allocated => LinkState.Available,
-                LinkDirection.Left when !left.allocated => LinkState.Mandated,
-                LinkDirection.Left => LinkState.Mandates,
-                LinkDirection.Right when !right.allocated => LinkState.Mandated,
-                LinkDirection.Right => LinkState.Mandates,
-                _ when left.allocated && right.allocated => LinkState.Taken,
-                _ => LinkState.Unavailable
-            };
+            if (left.allocated && right.allocated) return LinkState.Taken;
+            if (AllowsTravel()) {
+                return mandatory ? LinkState.Mandates : LinkState.Available;
+            }
+            return mandatory ?  LinkState.Mandated : LinkState.Unavailable;
         }
 
         public LinkDirection GetSide(PassiveNode node) {
@@ -58,12 +54,20 @@ namespace Passive {
             return left;
         }
 
+        public bool AllowsTravel() {
+            return direction switch {
+                LinkDirection.Left => right.allocated,
+                LinkDirection.Right => left.allocated,
+                _ => left.allocated || right.allocated
+            };
+        }
+
         public bool IsMandatory(PassiveNode node) {
-            return GetSide(node) == direction;
+            return mandatory && GetSide(node).Flip() == direction;
         }
 
         public bool IsDependant(PassiveNode node) {
-            return GetSide(node).Flip() == direction;
+            return mandatory && GetSide(node) == direction;
         }
 
     }

@@ -75,9 +75,9 @@ namespace Passive {
             if (root) return true;
             bool available = false;
             foreach (var link in links) {
-                var linkAllocated = link.GetLinkedPoint(this).allocated;
-                if (link.IsDependant(this) && !linkAllocated) return false;
-                available |= linkAllocated;
+                if (link.IsDependant(this) && !link.GetLinkedPoint(this).allocated) return false;
+                if (!available)
+                    available |= link.AllowsTravel();
             }
             return available;
         }

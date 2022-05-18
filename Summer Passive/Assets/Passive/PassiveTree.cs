@@ -12,9 +12,9 @@ public class LinkManagerEditor : Editor {
         DrawDefaultInspector();
             
         PassiveTree localTarget = (PassiveTree)target;
-        if (GUILayout.Button("Update Tree")) {
-            localTarget.UpdateLinks(true, true);
-            localTarget.UpdateNodes(true);
+        if (GUILayout.Button("Force Update")) {
+            localTarget.UpdateLinks();
+            localTarget.UpdateNodes();
         }
     }
 }
@@ -122,19 +122,16 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         }
     }
 
-    public void UpdateLinks(bool shouldAutoResize, bool shouldAutoLinkState) {
+    public void UpdateLinks() {
         foreach (var link in passiveLinks.Values) {
-            if (shouldAutoResize)
-                link.UpdateDimension();
-            if (shouldAutoLinkState)
-                link.UpdateState();
+            link.UpdateDimension();
+            link.UpdateState();
         }
     }
 
-    public void UpdateNodes(bool shouldAutoPassiveNode) {
-        foreach (var node in _passiveNodes) {
-            if (shouldAutoPassiveNode)
-                node.UpdateState();
+    public void UpdateNodes() {
+        foreach (var node in passiveNodes.Values) {
+            node.UpdateState();
         }
     }
 
