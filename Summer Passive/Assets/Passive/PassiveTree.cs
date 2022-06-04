@@ -77,13 +77,15 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     {
         if (editLinks) {
             
-            foreach (Transform child in linkContainer.transform) {
-                if (Application.isEditor) {
-                    DestroyImmediate(child.gameObject);
-                } else {
-                    Destroy(child.gameObject);
-                }
+            if (Application.isEditor) {
+                DestroyImmediate(linkContainer.gameObject);
+            } else {
+                Destroy(linkContainer.gameObject);
             }
+
+            linkContainer = new GameObject("links");
+            linkContainer.transform.SetParent(this.transform, false);
+            linkContainer.transform.SetAsFirstSibling();
 
             foreach (var passiveNode in _passiveNodes) {
                 passiveNode.links.Clear();
@@ -91,6 +93,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             passiveLinks.Clear();
             foreach (var kvp in passiveLinkRepresentations) {
                 PassiveLink passiveLink = Instantiate(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>();
+                passiveLink.gameObject.name += kvp.Key;
                 if (!passiveNodes.TryGetValue(kvp.Value.left, out passiveLink.left)) {
                     Debug.Log("Left node \" " + kvp.Value.left + " \"  of link " + kvp.Key + " couldn't be found");
                 } else {

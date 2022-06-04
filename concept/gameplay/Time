@@ -1,0 +1,11 @@
+Time
+
+currentTime = currentTime % 2400
+
+Time advances on key actions:
+
+Room Clear: 20
+Chest Opening: 20
+Floor Transition: 100
+
+Trader shop resets on specific time (0 and 1200)
