@@ -1,18 +1,17 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
-public class PassiveTooltip : MonoBehaviour
-{
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+public class PassiveTooltip : MonoBehaviour {
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public TextMeshProUGUI header;
+    public TextMeshProUGUI description;
+
+    public RectTransform _rectTransform;
+
+    private void Awake() {
+        _rectTransform = GetComponent<RectTransform>();
     }
 }

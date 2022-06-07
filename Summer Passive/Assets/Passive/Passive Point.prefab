@@ -167,10 +167,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   passiveTree: {fileID: 0}
   links: []
+  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
   allocated: 0
   root: 0
   id: 0
-  text: Point
+  nameText: Point
+  descriptionText: This is a passive point
 --- !u!1 &5930368226391283592
 GameObject:
   m_ObjectHideFlags: 0

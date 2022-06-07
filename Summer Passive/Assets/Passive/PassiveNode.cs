@@ -1,17 +1,30 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 namespace Passive {
-    public class PassiveNode : MonoBehaviour {
+    public class PassiveNode : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler {
         public PassiveTree passiveTree;
         public List<PassiveLink> links;
+        public GameObject tooltipPrefab;
+
+        private RectTransform _rectTransform;
+        private Button _button;
 
         public bool allocated;
         public bool root;
         public int id;
-        public string text;
+        public string nameText;
+        public string descriptionText;
+
+        private PassiveTooltip _passiveTooltip;
+        public bool hovered;
+        public int tooltipFixingTime;
+        public int hoverDuration;
 
         // Start is called before the first frame update
         void Start() {
@@ -19,9 +32,31 @@ namespace Passive {
         }
 
         // Update is called once per frame
-        void Update()
-        {
-            
+        void Update() {
+
+        }
+
+        private void Awake() {
+            _rectTransform = GetComponent<RectTransform>();
+            _button = GetComponent<Button>();
+        }
+
+        public void OnPointerMove(PointerEventData eventData) {
+           //_passiveTooltip._rectTransform.anchoredPosition += eventData.delta;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData) {
+            hovered = true;
+            _passiveTooltip = Instantiate(tooltipPrefab, transform).GetComponent<PassiveTooltip>();
+            _passiveTooltip._rectTransform.anchoredPosition +=
+                new Vector2(_passiveTooltip._rectTransform.sizeDelta.x*0.5f + _rectTransform.sizeDelta.x*0.5f,0);
+            _passiveTooltip.header.text = nameText;
+            _passiveTooltip.description.text = descriptionText;
+        }
+
+        public void OnPointerExit(PointerEventData eventData) {
+            hovered = false;
+            Destroy(_passiveTooltip.gameObject);
         }
 
         public void Toggle() {
@@ -51,11 +86,10 @@ namespace Passive {
 
         public void UpdateState() {
             var nodeState = ComputeState();
-            var passiveButton = GetComponent<Button>();
-            var colors = passiveButton.colors;
+            var colors = _button.colors;
             colors.normalColor = nodeState.Color();
             colors.selectedColor = nodeState.Color();
-            passiveButton.colors = colors;
+            _button.colors = colors;
         }
 
         private NodeState ComputeState() {

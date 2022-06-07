@@ -302,7 +302,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   passiveTree: {fileID: 0}
   links: []
+  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
   allocated: 1
   root: 1
   id: 0
-  text: Root
+  nameText: Root
+  descriptionText: Start Here

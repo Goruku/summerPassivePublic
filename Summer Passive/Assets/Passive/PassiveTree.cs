@@ -120,7 +120,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
                 passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.id.ToString();
             }
             else {
-                passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.text;
+                passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.nameText;
             }
         }
     }
