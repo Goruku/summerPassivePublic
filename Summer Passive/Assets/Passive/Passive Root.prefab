@@ -261,7 +261,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4267978073157769875}
         m_TargetAssemblyTypeName: Passive.PassivePoint, Assembly-CSharp
-        m_MethodName: Toggle
+        m_MethodName: Press
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -303,8 +303,16 @@ MonoBehaviour:
   passiveTree: {fileID: 0}
   links: []
   tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
+  stat: {fileID: 0}
+  statFlats: []
+  statIncreases: []
+  statMores: []
   allocated: 1
+  oldAllocated: 1
   root: 1
   id: 0
   nameText: Root
   descriptionText: Start Here
+  hovered: 0
+  tooltipFixingTime: 0
+  hoverDuration: 0

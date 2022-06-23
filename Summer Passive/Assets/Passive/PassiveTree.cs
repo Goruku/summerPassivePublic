@@ -93,6 +93,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             passiveLinks.Clear();
             foreach (var kvp in passiveLinkRepresentations) {
                 PassiveLink passiveLink = Instantiate(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>();
+                passiveLink.LinkComponents();
                 passiveLink.gameObject.name += kvp.Key;
                 if (!passiveNodes.TryGetValue(kvp.Value.left, out passiveLink.left)) {
                     Debug.Log("Left node \" " + kvp.Value.left + " \"  of link " + kvp.Key + " couldn't be found");

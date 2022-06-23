@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using StatUtil;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -7,10 +8,16 @@ using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 namespace Passive {
+    [ExecuteAlways]
     public class PassiveNode : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler {
         public PassiveTree passiveTree;
         public List<PassiveLink> links;
         public GameObject tooltipPrefab;
+
+        public Stat stat;
+        public List<StatFlat> statFlats;
+        public List<StatIncrease> statIncreases;
+        public List<StatMore> statMores;
 
         private RectTransform _rectTransform;
         private Button _button;
@@ -27,13 +34,13 @@ namespace Passive {
         public int hoverDuration;
 
         // Start is called before the first frame update
-        void Start() {
+        private void Start() {
 
         }
 
         // Update is called once per frame
-        void Update() {
-
+        private void Update() {
+            
         }
 
         private void Awake() {
@@ -59,29 +66,52 @@ namespace Passive {
             Destroy(_passiveTooltip.gameObject);
         }
 
-        public void Toggle() {
+        public void Press() {
+            if (allocated && !CheckIfSafeRemove()) return;
+            if (!allocated && !CheckAvailability()) return;
+            allocated = !allocated;
+            UpdateGraphics();
             if (allocated) {
-                Unallocate();
+                RegisterAllModifiers();
             }
             else {
-                Allocate();
+                 RemoveAllModifiers();
             }
         }
 
-        public bool Allocate() {
-            if (!CheckAvailability()) return false;
-            allocated = true;
-            UpdateState();
-            UpdateLinks();
-            return allocated;
+        private void RegisterAllModifiers() {
+            if (!stat) return;
+            foreach (var sf in statFlats) {
+                stat.RegisterModifier(sf);
+            }
+
+            foreach (var si in statIncreases) {
+                stat.RegisterModifier(si);
+            }
+
+            foreach (var sm in statMores) {
+                stat.RegisterModifier(sm);
+            }
         }
 
-        public bool Unallocate() {
-            if (!CheckIfSafeRemove()) return false;
-            allocated = false;
+        private void RemoveAllModifiers() {
+            if (!stat) return;
+            foreach (var sf in statFlats) {
+                stat.RemoveModifier(sf);
+            }
+
+            foreach (var si in statIncreases) {
+                stat.RemoveModifier(si);
+            }
+
+            foreach (var sm in statMores) {
+                stat.RemoveModifier(sm);
+            }
+        }
+
+        public void UpdateGraphics() {
             UpdateState();
             UpdateLinks();
-            return allocated;
         }
 
         public void UpdateState() {
@@ -105,7 +135,7 @@ namespace Passive {
             }
         }
         
-        public bool CheckAvailability() {
+        private bool CheckAvailability() {
             if (root) return true;
             bool available = false;
             foreach (var link in links) {
@@ -137,6 +167,10 @@ namespace Passive {
                 break;
             }
             return searchedPoints[passiveNode.GetInstanceID()];
+        }
+
+        public RectTransform GetRectTransform() {
+            return _rectTransform;
         }
     }
 

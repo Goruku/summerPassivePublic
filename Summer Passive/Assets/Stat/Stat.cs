@@ -1,9 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 
-namespace Stat {
+namespace StatUtil {
+
+    [CreateAssetMenu()]
+    [ExecuteAlways]
     public class Stat : ScriptableObject {
         public float baseValue;
         public double calculatedValue;
@@ -11,8 +16,52 @@ namespace Stat {
         public List<StatFlat> statFlats;
         public List<StatIncrease> statIncreases;
         public List<StatMore> statMores;
+        
+        public bool restorePlayMode;
+        private List<StatFlat> _oldStatFlats;
+        private List<StatIncrease> _oldStatIncreases;
+        private List<StatMore> _oldStatMores;
 
         private List<StatFormula> _statFormulas;
+
+        private Stat() {
+            #if UNITY_EDITOR
+            EditorApplication.playModeStateChanged += ManagePlayState;
+            #endif
+        }
+
+        private void OnEnable() {
+
+        }
+
+        private void OnDisable() {
+
+        }
+        
+        #if UNITY_EDITOR
+        public void ManagePlayState(PlayModeStateChange playModeStateChange) {
+            Debug.Log("Playchange");
+            if (restorePlayMode) {
+                switch (playModeStateChange) {
+                    case PlayModeStateChange.ExitingEditMode:
+                        _oldStatFlats = new List<StatFlat>(statFlats);
+                        _oldStatIncreases = new List<StatIncrease>(statIncreases);
+                        _oldStatMores = new List<StatMore>(statMores);
+                        break;
+                    case PlayModeStateChange.ExitingPlayMode:
+                        statFlats = new List<StatFlat>(_oldStatFlats);
+                        statIncreases = new List<StatIncrease>(_oldStatIncreases);
+                        statMores = new List<StatMore>(_oldStatMores);
+                        break;
+                }
+                UpdateValue();
+            }
+        }
+        #endif
+
+        private void OnValidate() {
+            UpdateValue();
+        }
 
         public void RegisterModifier(StatModifier statModifier) {
             switch (statModifier) {

@@ -1,6 +1,7 @@
 using KeyManagement;
 using Player.Ability;
 using UnityEngine;
+using StatUtil;
 
 namespace Player {
     public class Movement : MonoBehaviour {
@@ -9,7 +10,7 @@ namespace Player {
 
         public Dash dash;
 
-        public float moveSpeed;
+        public Stat moveSpeed;
 
         // Start is called before the first frame update
         void Start() {
@@ -29,7 +30,7 @@ namespace Player {
         private void FixedUpdate() {
             //General movement
             foreach (var keyInfo in keyManager.movementKeys) {
-                Move(keyInfo.held, keyInfo.direction, moveSpeed);
+                Move(keyInfo.held, keyInfo.direction, (float) moveSpeed.calculatedValue);
             }
             dash.Trigger();
         }

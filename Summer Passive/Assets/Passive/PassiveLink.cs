@@ -13,27 +13,42 @@ namespace Passive {
         public LinkDirection direction;
         public bool mandatory;
 
+        private RawImage _rawImage;
+        private RectTransform _rectTransform;
+
         // Start is called before the first frame update
-        void Start() { }
+        void Start() {
+
+        }
 
         // Update is called once per frame
         void Update() { }
 
+        private void Awake() {
+            _rawImage = GetComponent<RawImage>();
+            _rectTransform = GetComponent<RectTransform>();
+            LinkComponents();
+        }
+
+        public void LinkComponents() {
+            _rawImage = GetComponent<RawImage>();
+            _rectTransform = GetComponent<RectTransform>();
+        }
+
         public void UpdateState() {
             linkState = ComputeState();
-            GetComponent<RawImage>().color = linkState.Color();
+            _rawImage.color = linkState.Color();
         }
 
         public void UpdateDimension() {
-            var linkShape = GetComponent<RectTransform>();
-            var leftPosition = left.GetComponent<RectTransform>().anchoredPosition3D;
-            var rightPosition = right.GetComponent<RectTransform>().anchoredPosition3D;
-            linkShape.position = (rightPosition - leftPosition) * 0.5f;
-            linkShape.rotation = Quaternion.Euler(0, 0, MathF.Atan2(rightPosition.y - leftPosition.y, rightPosition.x - leftPosition.x) * Mathf.Rad2Deg);
-            linkShape.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 10);
-            linkShape.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+            var leftPosition = left.GetRectTransform().anchoredPosition3D;
+            var rightPosition = right.GetRectTransform().anchoredPosition3D;
+            _rectTransform.position = (rightPosition - leftPosition) * 0.5f;
+            _rectTransform.rotation = Quaternion.Euler(0, 0, MathF.Atan2(rightPosition.y - leftPosition.y, rightPosition.x - leftPosition.x) * Mathf.Rad2Deg);
+            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 10);
+            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 Vector3.Distance(rightPosition, leftPosition));
-            linkShape.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
+            _rectTransform.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
         }
         
         private LinkState ComputeState() {
