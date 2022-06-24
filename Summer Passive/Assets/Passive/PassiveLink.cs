@@ -25,19 +25,17 @@ namespace Passive {
         void Update() { }
 
         private void Awake() {
-            _rawImage = GetComponent<RawImage>();
-            _rectTransform = GetComponent<RectTransform>();
             LinkComponents();
-        }
-
-        public void LinkComponents() {
-            _rawImage = GetComponent<RawImage>();
-            _rectTransform = GetComponent<RectTransform>();
         }
 
         public void UpdateState() {
             linkState = ComputeState();
             _rawImage.color = linkState.Color();
+        }
+
+        public void LinkComponents() {
+            _rawImage = GetComponent<RawImage>();
+            _rectTransform = GetComponent<RectTransform>();
         }
 
         public void UpdateDimension() {

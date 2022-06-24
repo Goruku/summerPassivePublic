@@ -8,7 +8,6 @@ using UnityEngine;
 namespace StatUtil {
 
     [CreateAssetMenu()]
-    [ExecuteAlways]
     public class Stat : ScriptableObject {
         public float baseValue;
         public double calculatedValue;
@@ -39,23 +38,18 @@ namespace StatUtil {
         }
         
         #if UNITY_EDITOR
-        public void ManagePlayState(PlayModeStateChange playModeStateChange) {
-            Debug.Log("Playchange");
-            if (restorePlayMode) {
-                switch (playModeStateChange) {
-                    case PlayModeStateChange.ExitingEditMode:
-                        _oldStatFlats = new List<StatFlat>(statFlats);
-                        _oldStatIncreases = new List<StatIncrease>(statIncreases);
-                        _oldStatMores = new List<StatMore>(statMores);
-                        break;
-                    case PlayModeStateChange.ExitingPlayMode:
-                        statFlats = new List<StatFlat>(_oldStatFlats);
-                        statIncreases = new List<StatIncrease>(_oldStatIncreases);
-                        statMores = new List<StatMore>(_oldStatMores);
-                        break;
-                }
-                UpdateValue();
+        private void ManagePlayState(PlayModeStateChange playModeStateChange) {
+            if (playModeStateChange == PlayModeStateChange.ExitingEditMode) {
+                _oldStatFlats = new List<StatFlat>(statFlats);
+                _oldStatIncreases = new List<StatIncrease>(statIncreases);
+                _oldStatMores = new List<StatMore>(statMores);
             }
+            if (restorePlayMode && playModeStateChange == PlayModeStateChange.ExitingPlayMode) {
+                statFlats = new List<StatFlat>(_oldStatFlats);
+                statIncreases = new List<StatIncrease>(_oldStatIncreases);
+                statMores = new List<StatMore>(_oldStatMores);
+            }
+            UpdateValue();
         }
         #endif
 

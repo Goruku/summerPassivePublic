@@ -10,7 +10,6 @@ using UnityEngine.UI;
 namespace Passive {
     [ExecuteAlways]
     public class PassiveNode : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler {
-        public PassiveTree passiveTree;
         public List<PassiveLink> links;
         public GameObject tooltipPrefab;
 
