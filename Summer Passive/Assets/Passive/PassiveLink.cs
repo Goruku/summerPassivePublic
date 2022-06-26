@@ -13,7 +13,7 @@ namespace Passive {
         public LinkDirection direction;
         public bool mandatory;
 
-        private RawImage _rawImage;
+        private Image _image;
         private RectTransform _rectTransform;
 
         // Start is called before the first frame update
@@ -30,11 +30,11 @@ namespace Passive {
 
         public void UpdateState() {
             linkState = ComputeState();
-            _rawImage.color = linkState.Color();
+            _image.color = linkState.Color();
         }
 
         public void LinkComponents() {
-            _rawImage = GetComponent<RawImage>();
+            _image = GetComponent<Image>();
             _rectTransform = GetComponent<RectTransform>();
         }
 

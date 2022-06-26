@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Passive;
 using TMPro;
@@ -7,6 +8,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using System.Linq;
+using UnityEngine.EventSystems;
+using Object = UnityEngine.Object;
 
 [CustomEditor(typeof(PassiveTree))]
 public class LinkManagerEditor : Editor {
@@ -133,7 +136,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             if (editLinks) {
                 passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.id.ToString();
                 #if UNITY_EDITOR
-                //PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
                 #endif
             }
             else {
