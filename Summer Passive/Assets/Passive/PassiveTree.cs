@@ -149,7 +149,6 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
                 passiveLinkRepresentations[i] = new PassiveLinkRepresentation(linkRepresentation.travels,
                     linkRepresentation.right,
                     linkRepresentation.left,
-                    linkRepresentation.state,
                     linkRepresentation.direction.Flip(),
                     linkRepresentation.mandatory);
             }
@@ -179,7 +178,6 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             throw new NullReferenceException($"Right node \"{plr.right}\" couldn't be found");
         
         passiveLink.travels = plr.travels;
-        passiveLink.linkState = plr.state;
         passiveLink.direction = plr.direction;
         passiveLink.mandatory = plr.mandatory;
 
@@ -207,16 +205,14 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         public bool travels;
         public int left;
         public int right;
-        public LinkState state;
         public LinkDirection direction;
         public bool mandatory;
 
-        public PassiveLinkRepresentation(bool travels, int left, int right, LinkState state, LinkDirection direction,
+        public PassiveLinkRepresentation(bool travels, int left, int right, LinkDirection direction,
             bool mandatory) {
             this.travels = travels;
             this.left = left;
             this.right = right;
-            this.state = state;
             this.direction = direction;
             this.mandatory = mandatory;
         }
