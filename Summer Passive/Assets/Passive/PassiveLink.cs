@@ -9,12 +9,12 @@ namespace Passive {
     public class PassiveLink : MonoBehaviour {
 
         public LinkTextureMapper linkTextureMapper;
+        public bool travels = true;
         public PassiveNode left;
         public PassiveNode right;
         public LinkState linkState;
         public LinkDirection direction;
         public bool mandatory;
-        public bool travels;
 
         private Image _image;
         private RectTransform _rectTransform;
@@ -33,10 +33,13 @@ namespace Passive {
 
         public void UpdateState() {
             linkState = ComputeState();
-            _image.color = linkState.Color();
+            _image.color = linkTextureMapper.GetColor(linkState);
             _image.sprite = direction == LinkDirection.None
                 ? linkTextureMapper.nonDirected
                 : linkTextureMapper.directed;
+            
+            _image.color = travels ? new Color(_image.color.r, _image.color.g, _image.color.b, 1f) :
+                    _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 0.5f);
         }
 
         public void LinkComponents() {
@@ -59,9 +62,9 @@ namespace Passive {
         }
         
         private LinkState ComputeState() {
-            if (left.allocated && right.allocated) return LinkState.Taken;
-            if (AllowsTravel()) {
-                return mandatory ? LinkState.Mandates : LinkState.Available;
+            if (left.allocated && right.allocated) return mandatory ? LinkState.Mandates : LinkState.Taken;
+            if (HasParentTaken()) {
+                return mandatory ? LinkState.Mandates : travels ? LinkState.Available : LinkState.Unavailable;
             }
             return mandatory ?  LinkState.Mandated : LinkState.Unavailable;
         }
@@ -75,13 +78,16 @@ namespace Passive {
             if (node.GetInstanceID() == left.GetInstanceID()) return right;
             return left;
         }
-
-        public bool AllowsTravel() {
+        
+        public bool HasParentTaken() {
             return direction switch {
                 LinkDirection.Left => right.allocated,
                 LinkDirection.Right => left.allocated,
                 _ => left.allocated || right.allocated
             };
+        }
+        public bool AllowsTravel() {
+            return travels && HasParentTaken();
         }
 
         public bool IsMandatory(PassiveNode node) {

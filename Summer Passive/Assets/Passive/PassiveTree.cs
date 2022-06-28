@@ -112,12 +112,12 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
                 PassiveLinkRepresentation linkRepresentation = _passiveLinks[i];
                 passiveLink.gameObject.name = i.ToString();
                 if (!passiveNodes.TryGetValue(linkRepresentation.left, out passiveLink.left)) {
-                    Debug.Log("Left node \" " + linkRepresentation.left + " \"  of link " + i + " couldn't be found");
+                    Debug.Log($"Left node \"{linkRepresentation.left}\"  of link {i} couldn't be found");
                 } else {
                     passiveLink.left.links.Add(passiveLink);
                 }
                 if (!passiveNodes.TryGetValue(_passiveLinks[i].right, out passiveLink.right)) {
-                    Debug.Log("Right node \" " + linkRepresentation.right + " \"  of link " + i + " couldn't be found");
+                    Debug.Log($"Right node \"{linkRepresentation.right}\"  of link {i} couldn't be found");
                 }else {
                     passiveLink.right.links.Add(passiveLink);
                 }
@@ -125,9 +125,11 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
                 passiveLink.mandatory = linkRepresentation.mandatory;
                 passiveLink.linkState = linkRepresentation.state;
                 passiveLink.direction = linkRepresentation.direction;
+                passiveLink.travels = linkRepresentation.travels;
                 passiveLink.LinkComponents();
                 passiveLink.UpdateState();
                 passiveLink.UpdateDimension();
+                passiveLink.gameObject.name = $"({passiveLink.left.id},{passiveLink.right.id})";
             }
             _linksChanged = false;
         }
@@ -149,7 +151,8 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         for (int i = 0; i < _passiveLinks.Count; i++) {
             PassiveLinkRepresentation linkRepresentation = _passiveLinks[i];
             if (linkRepresentation.left > linkRepresentation.right) {
-                passiveLinkRepresentations[i] = new PassiveLinkRepresentation(linkRepresentation.right,
+                passiveLinkRepresentations[i] = new PassiveLinkRepresentation(linkRepresentation.travels,
+                    linkRepresentation.right,
                     linkRepresentation.left,
                     linkRepresentation.state,
                     linkRepresentation.direction.Flip(),
@@ -176,14 +179,16 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     [System.Serializable]
     public struct PassiveLinkRepresentation {
+        public bool travels;
         public int left;
         public int right;
         public LinkState state;
         public LinkDirection direction;
         public bool mandatory;
 
-        public PassiveLinkRepresentation(int left, int right, LinkState state, LinkDirection direction,
+        public PassiveLinkRepresentation(bool travels, int left, int right, LinkState state, LinkDirection direction,
             bool mandatory) {
+            this.travels = travels;
             this.left = left;
             this.right = right;
             this.state = state;

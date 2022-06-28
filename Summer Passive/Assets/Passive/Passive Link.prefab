@@ -95,4 +95,4 @@ MonoBehaviour:
   linkState: 0
   direction: 0
   mandatory: 0
-  travels: 0
+  travels: 1
