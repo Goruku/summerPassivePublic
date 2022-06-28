@@ -171,6 +171,7 @@ namespace Passive {
             
             searchedPoints.Add(passiveNode.GetInstanceID(), false);
             foreach (PassiveLink link in passiveNode.links) {
+                if (!link.travels) continue;
                 PassiveNode childNode = link.GetLinkedPoint(passiveNode);
                 if (!childNode.allocated || !ReachesRoot(childNode, searchedPoints)) continue;
                 searchedPoints[passiveNode.GetInstanceID()] = true;
