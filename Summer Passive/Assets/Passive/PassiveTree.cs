@@ -5,10 +5,8 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 using System.Linq;
-using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
 [CustomEditor(typeof(PassiveTree))]
@@ -33,10 +31,10 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     public Object linkPrefab;
     public Transform linkContainer;
-    
+
     public bool editLinks;
     public List<PassiveLinkRepresentation> _passiveLinks;
-    private Dictionary<int, PassiveLink> passiveLinks = new();
+    public List<PassiveLink> linkPool = new ();
     private bool _linksChanged;
 
     private Dictionary<int, PassiveLinkRepresentation> passiveLinkRepresentations = new ();
@@ -87,49 +85,16 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     {
         if (_linksChanged && editLinks) {
 
-            linkContainer = transform.GetChild(0);
-
-            while (linkContainer.childCount != _passiveLinks.Count) {
-                if (linkContainer.childCount < _passiveLinks.Count) {
-                    var passiveLink = Instantiate(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>();
-                }
-                else {
-                    if (Application.isEditor) {
-                        DestroyImmediate(linkContainer.GetChild(0).gameObject);
-                    }
-                    else {
-                        Destroy(linkContainer.GetChild(0).gameObject);
-                    }
-                }
-            }
+            ManageLinkPool();
 
             for (int i = 0; i < _passiveNodes.Count; i++) {
                 _passiveNodes[i].links.Clear();
                 _passiveNodes[i].gameObject.name = _passiveNodes[i].nameText + " (" + i + ")";
             }
             for (int i = 0; i < _passiveLinks.Count; i++) {
-                PassiveLink passiveLink =  linkContainer.GetChild(i).GetComponent<PassiveLink>();
-                PassiveLinkRepresentation linkRepresentation = _passiveLinks[i];
-                passiveLink.gameObject.name = i.ToString();
-                if (!passiveNodes.TryGetValue(linkRepresentation.left, out passiveLink.left)) {
-                    Debug.Log($"Left node \"{linkRepresentation.left}\"  of link {i} couldn't be found");
-                } else {
-                    passiveLink.left.links.Add(passiveLink);
-                }
-                if (!passiveNodes.TryGetValue(_passiveLinks[i].right, out passiveLink.right)) {
-                    Debug.Log($"Right node \"{linkRepresentation.right}\"  of link {i} couldn't be found");
-                }else {
-                    passiveLink.right.links.Add(passiveLink);
-                }
-                
-                passiveLink.mandatory = linkRepresentation.mandatory;
-                passiveLink.linkState = linkRepresentation.state;
-                passiveLink.direction = linkRepresentation.direction;
-                passiveLink.travels = linkRepresentation.travels;
-                passiveLink.LinkComponents();
-                passiveLink.UpdateState();
-                passiveLink.UpdateDimension();
-                passiveLink.gameObject.name = $"({passiveLink.left.id},{passiveLink.right.id})";
+                var passiveLink =  linkPool[i];
+                PassiveLinkRepresentation plr = _passiveLinks[i];
+                PushSettingsToLink(plr, passiveLink, $"({plr.left},{plr.right})");
             }
             _linksChanged = false;
         }
@@ -143,6 +108,36 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             }
             else {
                 passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.nameText;
+            }
+        }
+    }
+
+    private void ManageLinkPool() {
+        if (linkPool.Count != linkContainer.childCount) {
+            linkPool.Clear();
+            for (var i = linkContainer.childCount - 1; i >= 0; i--) {
+                if (Application.isPlaying)
+                    Destroy(linkContainer.GetChild(i).gameObject);
+                else
+                    DestroyImmediate(linkContainer.GetChild(i).gameObject);
+            }
+        }
+        while (linkPool.Count != _passiveLinks.Count) {
+            if (linkPool.Count < _passiveLinks.Count) {
+                #if UNITY_EDITOR
+                if (!Application.isPlaying) { 
+                    linkPool.Add(PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>());
+                } else
+                #endif
+                linkPool.Add(Instantiate(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>());
+            }
+            else {
+                var link = linkPool[0];
+                linkPool.RemoveAt(0);
+                if (Application.isPlaying)
+                    Destroy(link.gameObject);
+                else
+                    DestroyImmediate(link);
             }
         }
     }
@@ -165,7 +160,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     }
 
     public void UpdateLinks() {
-        foreach (var link in passiveLinks.Values) {
+        foreach (var link in linkPool) {
             link.UpdateDimension();
             link.UpdateState();
         }
@@ -176,8 +171,38 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             node.UpdateState();
         }
     }
+    
+    private PassiveLink PushSettingsToLink(PassiveLinkRepresentation plr, PassiveLink passiveLink) {
+        if (!passiveNodes.TryGetValue(plr.left, out passiveLink.left))
+            throw new NullReferenceException($"Left node \"{plr.left}\" couldn't be found");
+        if (!passiveNodes.TryGetValue(plr.right, out passiveLink.right))
+            throw new NullReferenceException($"Right node \"{plr.right}\" couldn't be found");
+        
+        passiveLink.travels = plr.travels;
+        passiveLink.linkState = plr.state;
+        passiveLink.direction = plr.direction;
+        passiveLink.mandatory = plr.mandatory;
 
-    [System.Serializable]
+        passiveLink.left.links.Add(passiveLink);
+        passiveLink.right.links.Add(passiveLink);
+        
+        passiveLink.UpdateState();
+        passiveLink.UpdateDimension();
+        
+        #if UNITY_EDITOR
+        PrefabUtility.RecordPrefabInstancePropertyModifications(passiveLink);
+        #endif
+
+        return passiveLink;
+    }
+
+    private PassiveLink PushSettingsToLink(PassiveLinkRepresentation plr, PassiveLink passiveLink, String name) {
+        passiveLink = PushSettingsToLink(plr, passiveLink);
+        passiveLink.gameObject.name = name;
+        return passiveLink;
+    }
+
+    [Serializable]
     public struct PassiveLinkRepresentation {
         public bool travels;
         public int left;
@@ -195,5 +220,12 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             this.direction = direction;
             this.mandatory = mandatory;
         }
+    }
+
+    [Serializable]
+    public struct TreeLink {
+        public PassiveNode left;
+        public PassiveLinkRepresentation linkSetting;
+        public PassiveNode right;
     }
 }

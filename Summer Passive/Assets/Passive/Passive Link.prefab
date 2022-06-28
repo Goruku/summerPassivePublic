@@ -90,9 +90,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   linkTextureMapper: {fileID: 11400000, guid: 49790b861cbbdc64cbd700db3bf8b697, type: 2}
+  travels: 1
   left: {fileID: 0}
   right: {fileID: 0}
   linkState: 0
   direction: 0
   mandatory: 0
-  travels: 1
+  image: {fileID: 3791710632551900750}
+  rectTransform: {fileID: 3267374049732641621}

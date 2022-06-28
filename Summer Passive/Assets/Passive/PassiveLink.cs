@@ -16,8 +16,8 @@ namespace Passive {
         public LinkDirection direction;
         public bool mandatory;
 
-        private Image _image;
-        private RectTransform _rectTransform;
+        public Image image;
+        public RectTransform rectTransform;
 
         // Start is called before the first frame update
         void Start() {
@@ -28,35 +28,31 @@ namespace Passive {
         void Update() { }
 
         private void Awake() {
-            LinkComponents();
+            image = GetComponent<Image>();
+            rectTransform = GetComponent<RectTransform>();
         }
 
         public void UpdateState() {
             linkState = ComputeState();
-            _image.color = linkTextureMapper.GetColor(linkState);
-            _image.sprite = direction == LinkDirection.None
+            image.color = linkTextureMapper.GetColor(linkState);
+            image.sprite = direction == LinkDirection.None
                 ? linkTextureMapper.nonDirected
                 : linkTextureMapper.directed;
             
-            _image.color = travels ? new Color(_image.color.r, _image.color.g, _image.color.b, 1f) :
-                    _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 0.5f);
-        }
-
-        public void LinkComponents() {
-            _image = GetComponent<Image>();
-            _rectTransform = GetComponent<RectTransform>();
+            image.color = travels ? new Color(image.color.r, image.color.g, image.color.b, 1f) :
+                    image.color = new Color(image.color.r, image.color.g, image.color.b, 0.5f);
         }
 
         public void UpdateDimension() {
             var leftPosition = left.GetRectTransform().anchoredPosition3D;
             var rightPosition = right.GetRectTransform().anchoredPosition3D;
-            _rectTransform.position = (rightPosition - leftPosition) * 0.5f;
-            _rectTransform.rotation = Quaternion.Euler(0, 0, MathF.Atan2(rightPosition.y - leftPosition.y, rightPosition.x - leftPosition.x) * Mathf.Rad2Deg);
-            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 10);
-            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+            rectTransform.position = (rightPosition - leftPosition) * 0.5f;
+            rectTransform.rotation = Quaternion.Euler(0, 0, MathF.Atan2(rightPosition.y - leftPosition.y, rightPosition.x - leftPosition.x) * Mathf.Rad2Deg);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 10);
+            rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 Vector3.Distance(rightPosition, leftPosition));
-            _rectTransform.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
-            _rectTransform.localScale = direction == LinkDirection.Left ?  new Vector3(-1, 1, 1) :
+            rectTransform.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
+            rectTransform.localScale = direction == LinkDirection.Left ?  new Vector3(-1, 1, 1) :
                 new Vector3(1, 1, 1);
 
         }
