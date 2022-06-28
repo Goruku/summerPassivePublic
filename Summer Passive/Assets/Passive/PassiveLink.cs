@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Passive.texture;
 using UnityEngine;
 using UnityEngine.UI;

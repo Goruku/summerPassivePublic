@@ -101,14 +101,13 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
         foreach (var passiveNode in _passiveNodes) {
             if (editLinks) {
-                passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.id.ToString();
-                #if UNITY_EDITOR
-                PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
-                #endif
+                passiveNode.textGUI.text = passiveNode.id.ToString();
+            } else {
+                passiveNode.textGUI.text = passiveNode.nameText;
             }
-            else {
-                passiveNode.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = passiveNode.nameText;
-            }
+            #if UNITY_EDITOR
+            PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
+            #endif
         }
     }
 

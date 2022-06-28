@@ -165,6 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f210c3a4304e7347902ddc4b47942a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  textGUI: {fileID: 5930368226391283598}
   links: []
   tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
   stat: {fileID: 0}

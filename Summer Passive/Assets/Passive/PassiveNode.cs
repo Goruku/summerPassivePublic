@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using StatUtil;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 namespace Passive {
     [ExecuteAlways]
     public class PassiveNode : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler {
+        public TextMeshProUGUI textGUI;
         public List<PassiveLink> links;
         public GameObject tooltipPrefab;
 
@@ -54,8 +54,8 @@ namespace Passive {
         public void OnPointerEnter(PointerEventData eventData) {
             hovered = true;
             _passiveTooltip = Instantiate(tooltipPrefab, transform).GetComponent<PassiveTooltip>();
-            _passiveTooltip._rectTransform.anchoredPosition +=
-                new Vector2(_passiveTooltip._rectTransform.sizeDelta.x*0.5f + _rectTransform.sizeDelta.x*0.5f,0);
+            _passiveTooltip.rectTransform.anchoredPosition +=
+                new Vector2(_passiveTooltip.rectTransform.sizeDelta.x*0.5f + _rectTransform.sizeDelta.x*0.5f,0);
             _passiveTooltip.header.text = nameText;
             _passiveTooltip.description.text = descriptionText;
         }
@@ -182,6 +182,10 @@ namespace Passive {
 
         public RectTransform GetRectTransform() {
             return _rectTransform;
+        }
+
+        public void SetText(String text) {
+            textGUI.text = text;
         }
     }
 
