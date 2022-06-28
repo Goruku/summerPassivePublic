@@ -89,8 +89,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c36c18803367fde489a06419c41a4d71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  linkTextureMapper: {fileID: 11400000, guid: 49790b861cbbdc64cbd700db3bf8b697, type: 2}
   left: {fileID: 0}
   right: {fileID: 0}
   linkState: 0
   direction: 0
   mandatory: 0
+  travels: 0

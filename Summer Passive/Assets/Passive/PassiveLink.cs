@@ -1,17 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Passive.texture;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Passive {
     public class PassiveLink : MonoBehaviour {
 
+        public LinkTextureMapper linkTextureMapper;
         public PassiveNode left;
         public PassiveNode right;
         public LinkState linkState;
         public LinkDirection direction;
         public bool mandatory;
+        public bool travels;
 
         private Image _image;
         private RectTransform _rectTransform;
@@ -31,6 +34,9 @@ namespace Passive {
         public void UpdateState() {
             linkState = ComputeState();
             _image.color = linkState.Color();
+            _image.sprite = direction == LinkDirection.None
+                ? linkTextureMapper.nonDirected
+                : linkTextureMapper.directed;
         }
 
         public void LinkComponents() {
@@ -47,6 +53,9 @@ namespace Passive {
             _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 Vector3.Distance(rightPosition, leftPosition));
             _rectTransform.anchoredPosition3D = leftPosition + (rightPosition - leftPosition) * 0.5f;
+            _rectTransform.localScale = direction == LinkDirection.Left ?  new Vector3(-1, 1, 1) :
+                new Vector3(1, 1, 1);
+
         }
         
         private LinkState ComputeState() {

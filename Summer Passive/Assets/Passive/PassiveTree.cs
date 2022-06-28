@@ -158,6 +158,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         }
         var sortedDict = from entry in passiveLinkRepresentations orderby entry.Value.left, entry.Value.right select entry;
         passiveLinkRepresentations = sortedDict.ToDictionary(t => t.Key, t => t.Value);
+        UpdateLinks();
     }
 
     public void UpdateLinks() {
