@@ -22,7 +22,7 @@ namespace Passive {
         private Button _button;
 
         public bool allocated;
-        public bool root;
+        public int neighbourNeeded = 1;
         public int id;
         public string nameText;
         public string descriptionText;
@@ -135,7 +135,8 @@ namespace Passive {
         }
         
         private bool CheckAvailability() {
-            if (root) return true;
+            if (neighbourNeeded == 0) return true;
+            if (GetNeighbourCount() < neighbourNeeded) return false;
             bool available = false;
             foreach (var link in links) {
                 if (link.IsDependant(this) && !link.GetLinkedPoint(this).allocated) return false;
@@ -146,17 +147,27 @@ namespace Passive {
         }
         private bool CheckIfSafeRemove() {
             Dictionary<int, bool> searchedPoints = new () {{ GetInstanceID(), false}};
-            foreach (PassiveLink link in links) {
-                PassiveNode childNode = link.GetLinkedPoint(this);
+            foreach (var link in links) {
+                var childNode = link.GetLinkedPoint(this);
                 if (!childNode.allocated) continue;
+                if (childNode.GetNeighbourCount() - 1 < childNode.neighbourNeeded) return false;
                 if (link.IsMandatory(this) || !ReachesRoot(childNode, searchedPoints)) return false;
             }
             return true;
         }
 
+        public int GetNeighbourCount() {
+            var neighbourCount = 0;
+            foreach (var link in links) {
+                if (!link.GetLinkedPoint(this).allocated) continue;
+                neighbourCount++;
+            }
+            return neighbourCount;
+        }
+
         private static bool ReachesRoot(PassiveNode passiveNode, Dictionary<int, bool> searchedPoints) {
             if (searchedPoints.TryGetValue(passiveNode.GetInstanceID(), out var canReach)) return canReach;
-            if (passiveNode.root) return true;
+            if (passiveNode.neighbourNeeded == 0) return true;
             
             searchedPoints.Add(passiveNode.GetInstanceID(), false);
             foreach (PassiveLink link in passiveNode.links) {
