@@ -8,27 +8,16 @@ using UnityEngine;
 namespace StatUtil {
 
     [CreateAssetMenu()]
-    public class Stat : ScriptableObject {
+    public class Stat : RestorableScriptableObject {
         public float baseValue;
         public double calculatedValue;
 
         public List<StatFlat> statFlats;
         public List<StatIncrease> statIncreases;
         public List<StatMore> statMores;
-        
-        public bool restorePlayMode;
-        private List<StatFlat> _oldStatFlats;
-        private List<StatIncrease> _oldStatIncreases;
-        private List<StatMore> _oldStatMores;
 
         private List<StatFormula> _statFormulas;
-
-        private Stat() {
-            #if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += ManagePlayState;
-            #endif
-        }
-
+        
         private void OnEnable() {
 
         }
@@ -36,22 +25,10 @@ namespace StatUtil {
         private void OnDisable() {
 
         }
-        
-        #if UNITY_EDITOR
-        private void ManagePlayState(PlayModeStateChange playModeStateChange) {
-            if (playModeStateChange == PlayModeStateChange.ExitingEditMode) {
-                _oldStatFlats = new List<StatFlat>(statFlats);
-                _oldStatIncreases = new List<StatIncrease>(statIncreases);
-                _oldStatMores = new List<StatMore>(statMores);
-            }
-            if (restorePlayMode && playModeStateChange == PlayModeStateChange.ExitingPlayMode) {
-                statFlats = new List<StatFlat>(_oldStatFlats);
-                statIncreases = new List<StatIncrease>(_oldStatIncreases);
-                statMores = new List<StatMore>(_oldStatMores);
-            }
+
+        protected override void CleanUpPlayState() {
             UpdateValue();
         }
-        #endif
 
         private void OnValidate() {
             UpdateValue();
