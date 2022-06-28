@@ -34,13 +34,8 @@ namespace Passive {
 
         public void UpdateState() {
             linkState = ComputeState();
-            image.color = linkTextureMapper.GetColor(linkState);
-            image.sprite = direction == LinkDirection.None
-                ? linkTextureMapper.nonDirected
-                : linkTextureMapper.directed;
-            
-            image.color = travels ? new Color(image.color.r, image.color.g, image.color.b, 1f) :
-                    image.color = new Color(image.color.r, image.color.g, image.color.b, 0.5f);
+            image.color = linkTextureMapper.GetColor(linkState, travels);
+            image.sprite = linkTextureMapper.GetSprite(direction, travels);
         }
 
         public void UpdateDimension() {

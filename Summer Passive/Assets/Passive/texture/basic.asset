@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nonDirected: {fileID: 21300000, guid: 75e0d6a7c2bfeed4eb608317c7158c4e, type: 3}
   directed: {fileID: 21300000, guid: 478bb0e915505fa42b676a661aeeafaf, type: 3}
+  nonDirectedTL: {fileID: 21300000, guid: 8dad3c3c99f05c14fafd0122b4f3ffe6, type: 3}
+  directedTL: {fileID: 21300000, guid: 6e62a8cadda98c744a2d3d38e8a6c69a, type: 3}
+  nonDirectedAlpha: 0.5
   unavailable: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 1}
   taken: {r: 1, g: 0.84313726, b: 0.015686275, a: 1}
   available: {r: 0.7924528, g: 0.530917, b: 0.22726944, a: 1}
