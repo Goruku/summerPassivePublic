@@ -4367,7 +4367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   linkPrefab: {fileID: 3267374049732641620, guid: 77aabcd4957f08f4796fe248097f041f, type: 3}
   linkContainer: {fileID: 944355951}
-  editLinks: 0
+  editLinks: 1
   _passiveLinks:
   - travels: 1
     left: 0

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b8eb1aa2147ab4ea25c872c3dbabb6, type: 3}
   m_Name: Movement Speed
   m_EditorClassIdentifier: 
+  restorePlayMode: 1
   baseValue: 0.1
   calculatedValue: 0.1350000014156103
   statFlats: []
   statIncreases:
   - value: 0.35
   statMores: []
-  restorePlayMode: 1
