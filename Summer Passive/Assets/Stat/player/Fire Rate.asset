@@ -12,15 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2b8eb1aa2147ab4ea25c872c3dbabb6, type: 3}
   m_Name: Fire Rate
   m_EditorClassIdentifier: 
-  baseValue: 1
-  calculatedValue: 13.95000000782311
-  statFlats:
-  - value: 4
-    statSourceOverwrite: {fileID: 0}
-  statIncreases:
-  - value: 0.35
-  - value: 0.2
-  statMores:
-  - value: 0.5
-  - value: 0.2
   restorePlayMode: 0
+  baseValue: 1
+  calculatedValue: 1
+  statFlats: []
+  statIncreases: []
+  statMores: []
