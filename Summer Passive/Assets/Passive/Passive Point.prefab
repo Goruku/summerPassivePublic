@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5930368225767024472}
   - component: {fileID: 5930368225767024473}
   - component: {fileID: 5930368225767024475}
+  - component: {fileID: 1959703056635692507}
   m_Layer: 5
   m_Name: Passive Point
   m_TagString: Untagged
@@ -165,21 +166,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f210c3a4304e7347902ddc4b47942a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textGUI: {fileID: 5930368226391283598}
   links: []
-  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
-  stat: {fileID: 0}
-  statFlats: []
-  statIncreases: []
-  statMores: []
   allocated: 0
   neighbourNeeded: 1
   id: 0
+--- !u!114 &1959703056635692507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5930368225767024420}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9930056a5e147f89c79c0f19f593513, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
   nameText: Point
   descriptionText: This is a passive point
+  textGUI: {fileID: 5930368226391283598}
   hovered: 0
   tooltipFixingTime: 0
   hoverDuration: 0
+  _rectTransform: {fileID: 0}
 --- !u!1 &5930368226391283592
 GameObject:
   m_ObjectHideFlags: 0

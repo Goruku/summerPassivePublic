@@ -8,12 +8,12 @@ using UnityEngine.UI;
 
 namespace Passive {
     [ExecuteAlways]
-    public class PassiveNode : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler {
-        public TextMeshProUGUI textGUI;
+    public class PassiveNode : MonoBehaviour {
         public List<PassiveLink> links;
-        public GameObject tooltipPrefab;
 
         private List<PassiveStat> _passiveStats = new ();
+        private PassiveNodeGraphics _passiveNodeGraphics;
+        private bool _hasCustomGraphics = false;
 
         private RectTransform _rectTransform;
         private Button _button;
@@ -21,13 +21,6 @@ namespace Passive {
         public bool allocated;
         public int neighbourNeeded = 1;
         public int id;
-        public string nameText;
-        public string descriptionText;
-
-        private PassiveTooltip _passiveTooltip;
-        public bool hovered;
-        public int tooltipFixingTime;
-        public int hoverDuration;
 
         // Start is called before the first frame update
         private void Start() { }
@@ -38,24 +31,6 @@ namespace Passive {
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
             _button = GetComponent<Button>();
-        }
-
-        public void OnPointerMove(PointerEventData eventData) {
-            //_passiveTooltip._rectTransform.anchoredPosition += eventData.delta;
-        }
-
-        public void OnPointerEnter(PointerEventData eventData) {
-            hovered = true;
-            _passiveTooltip = Instantiate(tooltipPrefab, transform).GetComponent<PassiveTooltip>();
-            _passiveTooltip.rectTransform.anchoredPosition +=
-                new Vector2(_passiveTooltip.rectTransform.sizeDelta.x * 0.5f + _rectTransform.sizeDelta.x * 0.5f, 0);
-            _passiveTooltip.header.text = nameText;
-            _passiveTooltip.description.text = descriptionText;
-        }
-
-        public void OnPointerExit(PointerEventData eventData) {
-            hovered = false;
-            Destroy(_passiveTooltip.gameObject);
         }
 
         public void Press() {
@@ -164,16 +139,31 @@ namespace Passive {
             return _rectTransform;
         }
 
-        public void SetText(String text) {
-            textGUI.text = text;
-        }
-        
         public void AddStat(PassiveStat passiveStat) {
             _passiveStats.Add(passiveStat);
         }
 
         public void RemoveStat(PassiveStat passiveStat) {
             _passiveStats.Remove(passiveStat);
+        }
+
+        public void SetGraphics(PassiveNodeGraphics passiveNodeGraphics) {
+            _passiveNodeGraphics = passiveNodeGraphics;
+            _hasCustomGraphics = true;
+        }
+
+        public void RemoveGraphics(PassiveNodeGraphics passiveNodeGraphics) {
+            //TODO: modular?
+            _passiveNodeGraphics = null;
+            _hasCustomGraphics = false;
+        }
+
+        public ref PassiveNodeGraphics GetGraphics() {
+            return ref _passiveNodeGraphics;
+        }
+
+        public bool HasCustomGraphics() {
+            return _hasCustomGraphics;
         }
     }
 
