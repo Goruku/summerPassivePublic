@@ -2260,7 +2260,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5930368225767024420, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: m_Name
-      value: MS (2)
+      value: Point (2)
       objectReference: {fileID: 0}
     - target: {fileID: 5930368225767024475, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: id
@@ -6100,7 +6100,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5930368225767024420, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: m_Name
-      value: DMG (3)
+      value: Point (3)
       objectReference: {fileID: 0}
     - target: {fileID: 5930368225767024475, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: id
@@ -6261,7 +6261,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5930368225767024420, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: m_Name
-      value: Root (0)
+      value: Point (0)
       objectReference: {fileID: 0}
     - target: {fileID: 5930368225767024475, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: root
@@ -6402,7 +6402,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5930368225767024475, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
   m_PrefabInstance: {fileID: 1936518411}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1936518414}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f210c3a4304e7347902ddc4b47942a6, type: 3}
@@ -6413,6 +6413,43 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5930368225767024477, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
   m_PrefabInstance: {fileID: 1936518411}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1936518414 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5930368225767024420, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
+  m_PrefabInstance: {fileID: 1936518411}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1936518415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936518414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80891314eb7b45908e5e43bf9d889710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stat: {fileID: 0}
+  statFlats: []
+  statIncreases: []
+  statMores: []
+--- !u!114 &1936518416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1936518414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80891314eb7b45908e5e43bf9d889710, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stat: {fileID: 0}
+  statFlats: []
+  statIncreases: []
+  statMores: []
 --- !u!1001 &1937519504
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7024,7 +7061,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5930368225767024420, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: m_Name
-      value: DMG (1)
+      value: Point (1)
       objectReference: {fileID: 0}
     - target: {fileID: 5930368225767024475, guid: ba5293fdbcfb23a4da7354b6bdaec5a6, type: 3}
       propertyPath: id

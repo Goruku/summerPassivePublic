@@ -14,12 +14,10 @@ namespace Passive {
 
         public List<PassiveLink> links;
 
-        public NodeAction NodeActions = b => {};
-        private PassiveNodeGraphics _passiveNodeGraphics;
-        private bool _hasCustomGraphics = false;
+        public string passiveName = "";
+        public NodeAction NodeActions = b => { };
 
         private RectTransform _rectTransform;
-        private Button _button;
 
         [SerializeField, GetSet("allocated")]
         private bool _allocated;
@@ -29,7 +27,7 @@ namespace Passive {
             set {
                 _allocated = value;
                 NodeActions(_allocated);
-                UpdateGraphics();
+                UpdateLinks();
             }
         }
         public int neighbourNeeded = 1;
@@ -43,33 +41,12 @@ namespace Passive {
 
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
-            _button = GetComponent<Button>();
         }
 
         public void Press() {
             if (allocated && !CheckIfSafeRemove()) return;
             if (!allocated && !CheckAvailability()) return;
             allocated = !allocated;
-        }
-
-        public void UpdateGraphics() {
-            UpdateState();
-            UpdateLinks();
-        }
-
-        public void UpdateState() {
-            var nodeState = ComputeState();
-            var colors = _button.colors;
-            colors.normalColor = nodeState.Color();
-            colors.selectedColor = nodeState.Color();
-            _button.colors = colors;
-        }
-
-        private NodeState ComputeState() {
-            return allocated switch {
-                true => NodeState.Allocated,
-                false => NodeState.UnAllocated
-            };
         }
 
         private void UpdateLinks() {
@@ -132,39 +109,10 @@ namespace Passive {
         public RectTransform GetRectTransform() {
             return _rectTransform;
         }
-
-        public void SetGraphics(PassiveNodeGraphics passiveNodeGraphics) {
-            _passiveNodeGraphics = passiveNodeGraphics;
-            _hasCustomGraphics = true;
-        }
-
-        public void RemoveGraphics(PassiveNodeGraphics passiveNodeGraphics) {
-            //TODO: modular?
-            _passiveNodeGraphics = null;
-            _hasCustomGraphics = false;
-        }
-
-        public ref PassiveNodeGraphics GetGraphics() {
-            return ref _passiveNodeGraphics;
-        }
-
-        public bool HasCustomGraphics() {
-            return _hasCustomGraphics;
-        }
     }
 
     public enum NodeState {
         UnAllocated,
         Allocated
-    }
-    
-    static class NodeEnumMethods {
-        public static Color Color(this NodeState nodeState) {
-            return nodeState switch {
-                NodeState.UnAllocated => UnityEngine.Color.white,
-                NodeState.Allocated => UnityEngine.Color.yellow,
-                _ => UnityEngine.Color.black
-            };
-        }
     }
 }

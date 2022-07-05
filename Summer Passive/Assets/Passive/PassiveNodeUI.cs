@@ -1,16 +1,19 @@
 ﻿using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Passive {
     [RequireComponent(typeof(PassiveNode))]
+    [RequireComponent(typeof(Button))]
     [ExecuteAlways]
-    public class PassiveNodeGraphics : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler{
+    public class PassiveNodeUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler{
         
         public GameObject tooltipPrefab;
         private PassiveTooltip _passiveTooltip;
+
+        public string overloadName = "";
 
         public string nameText;
         public string descriptionText;
@@ -23,15 +26,17 @@ namespace Passive {
 
         private RectTransform _rectTransform;
         private PassiveNode _passiveNode;
+        private Button _button;
 
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
             _passiveNode = GetComponent<PassiveNode>();
-            _passiveNode.SetGraphics(this);
+            _button = GetComponent<Button>();
+            _passiveNode.NodeActions += UpdateGraphics;
         }
 
         private void OnDestroy() {
-            _passiveNode.RemoveGraphics(this);
+            _passiveNode.NodeActions -= UpdateGraphics;
         }
 
 
@@ -54,9 +59,31 @@ namespace Passive {
             hovered = false;
             Destroy(_passiveTooltip.gameObject);
         }
-        
-        public void SetText(String text) {
-            textGUI.text = text;
+
+        public void UpdateGraphics(bool allocated) {
+            var nodeState = ComputeState(allocated);
+            var colors = _button.colors;
+            colors.normalColor = nodeState.Color();
+            colors.selectedColor = nodeState.Color();
+            _button.colors = colors;
+            textGUI.text = overloadName == "" ?  _passiveNode.passiveName : overloadName;
+        }
+
+        private NodeState ComputeState(bool allocated) {
+            return allocated switch {
+                true => NodeState.Allocated,
+                false => NodeState.UnAllocated
+            };
+        }
+    }
+    
+    static class NodeEnumMethods {
+        public static Color Color(this NodeState nodeState) {
+            return nodeState switch {
+                NodeState.UnAllocated => UnityEngine.Color.white,
+                NodeState.Allocated => UnityEngine.Color.yellow,
+                _ => UnityEngine.Color.black
+            };
         }
     }
 }

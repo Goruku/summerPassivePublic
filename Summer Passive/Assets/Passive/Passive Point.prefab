@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5930368225767024477}
   - component: {fileID: 5930368225767024475}
-  - component: {fileID: 1959703056635692507}
+  - component: {fileID: 499988912431741092}
   - component: {fileID: 5930368225767024479}
   - component: {fileID: 5930368225767024478}
   - component: {fileID: 5930368225767024472}
@@ -56,10 +56,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   links: []
+  passiveName: Point
   _allocated: 0
   neighbourNeeded: 1
   id: 0
---- !u!114 &1959703056635692507
+--- !u!114 &499988912431741092
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,9 +72,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9930056a5e147f89c79c0f19f593513, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
+  tooltipPrefab: {fileID: 5930368226391283592}
   nameText: Point
-  descriptionText: This is a passive point
+  descriptionText: 
   textGUI: {fileID: 5930368226391283598}
   hovered: 0
   tooltipFixingTime: 0

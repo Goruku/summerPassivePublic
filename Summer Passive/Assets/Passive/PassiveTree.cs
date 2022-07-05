@@ -35,9 +35,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     public bool editLinks;
     public List<PassiveLinkSetting> _passiveLinks;
     public List<PassiveLink> linkPool = new ();
-    private bool _linksChanged;
-
-    private Dictionary<int, PassiveLinkSetting> passiveLinkRepresentations = new ();
+    private bool _deserialized;
     
     public List<PassiveNode> _passiveNodes;
     private Dictionary<int, PassiveNode> passiveNodes = new ();
@@ -46,11 +44,6 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         _passiveNodes.Clear();
         foreach (var kvp in passiveNodes) {
             _passiveNodes.Add(kvp.Value);
-        }
-        
-        _passiveLinks.Clear();
-        foreach (var kvp in passiveLinkRepresentations) {
-            _passiveLinks.Add(kvp.Value);
         }
     }
 
@@ -64,14 +57,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             passiveNodes.Add(keyCount, passiveNode); 
             keyCount++;
         }
-
-        passiveLinkRepresentations = new Dictionary<int, PassiveLinkSetting>();
-        int linkCount = 0;
-        foreach (var passiveLink in _passiveLinks) {
-            passiveLinkRepresentations.Add(linkCount, passiveLink);
-            linkCount++;
-        }
-        _linksChanged = true;
+        _deserialized = true;
     }
 
     // Start is called before the first frame update
@@ -81,42 +67,34 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if (_linksChanged && editLinks) {
+    void Update() {
+        if (!_deserialized) return;
+        if (editLinks) {
 
             ManageLinkPool();
 
             for (int i = 0; i < _passiveNodes.Count; i++) {
                 _passiveNodes[i].links.Clear();
-                if (_passiveNodes[i].HasCustomGraphics()) {
-                    _passiveNodes[i].gameObject.name = $"{_passiveNodes[i].GetGraphics().nameText} ({i})";
-                }
-                else {
-                    _passiveNodes[i].gameObject.name = $"({i})";
-                }
-                
+                _passiveNodes[i].gameObject.name = $"{_passiveNodes[i].passiveName} ({i})";
             }
             for (int i = 0; i < _passiveLinks.Count; i++) {
                 var passiveLink =  linkPool[i];
                 PassiveLinkSetting plr = _passiveLinks[i];
                 PushSettingsToLink(plr, passiveLink, $"({plr.left},{plr.right})");
             }
-            _linksChanged = false;
         }
-
+        
         foreach (var passiveNode in _passiveNodes) {
-            if (passiveNode.HasCustomGraphics()) {
-                if (editLinks) {
-                    passiveNode.GetGraphics().SetText(passiveNode.id.ToString());
-                } else {
-                    passiveNode.GetGraphics().SetText(passiveNode.GetGraphics().nameText);
-                }
+            var passiveUI = passiveNode.GetComponent<PassiveNodeUI>();
+            if (passiveUI) {
+                passiveUI.overloadName = editLinks ? passiveNode.id.ToString() : "";
             }
+            passiveNode.NodeActions(passiveNode.allocated);
             #if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
             #endif
         }
+        _deserialized = false;
     }
 
     private void ManageLinkPool() {
@@ -151,17 +129,17 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     public void SortLinkInterface() {
         for (int i = 0; i < _passiveLinks.Count; i++) {
-            PassiveLinkSetting linkSetting = _passiveLinks[i];
+            var linkSetting = _passiveLinks[i];
             if (linkSetting.left > linkSetting.right) {
-                passiveLinkRepresentations[i] = new PassiveLinkSetting(linkSetting.travels,
+                _passiveLinks[i] = new PassiveLinkSetting(linkSetting.travels,
                     linkSetting.right,
                     linkSetting.left,
                     linkSetting.direction.Flip(),
                     linkSetting.mandatory);
             }
         }
-        var sortedDict = from entry in passiveLinkRepresentations orderby entry.Value.left, entry.Value.right select entry;
-        passiveLinkRepresentations = sortedDict.ToDictionary(t => t.Key, t => t.Value);
+        var sortedDict = from entry in _passiveLinks orderby entry.left, entry.right select entry;
+        _passiveLinks = sortedDict.ToList();
         UpdateLinks();
     }
 
@@ -174,7 +152,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     public void UpdateNodes() {
         foreach (var node in passiveNodes.Values) {
-            node.UpdateState();
+            node.NodeActions(node.allocated);
         }
     }
     
