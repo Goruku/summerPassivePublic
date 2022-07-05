@@ -5,20 +5,33 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Util;
 
 namespace Passive {
     [ExecuteAlways]
     public class PassiveNode : MonoBehaviour {
+        public delegate void NodeAction(bool allocated);
+
         public List<PassiveLink> links;
 
-        private List<PassiveStat> _passiveStats = new ();
+        public NodeAction NodeActions = b => {};
         private PassiveNodeGraphics _passiveNodeGraphics;
         private bool _hasCustomGraphics = false;
 
         private RectTransform _rectTransform;
         private Button _button;
 
-        public bool allocated;
+        [SerializeField, GetSet("allocated")]
+        private bool _allocated;
+
+        public bool allocated {
+            get { return _allocated;}
+            set {
+                _allocated = value;
+                NodeActions(_allocated);
+                UpdateGraphics();
+            }
+        }
         public int neighbourNeeded = 1;
         public int id;
 
@@ -37,25 +50,6 @@ namespace Passive {
             if (allocated && !CheckIfSafeRemove()) return;
             if (!allocated && !CheckAvailability()) return;
             allocated = !allocated;
-            UpdateGraphics();
-            if (allocated) {
-                RegisterAllModifiers();
-            }
-            else {
-                RemoveAllModifiers();
-            }
-        }
-
-        private void RegisterAllModifiers() {
-            foreach (var stat in _passiveStats) {
-                stat.RegisterAllModifiers();
-            }
-        }
-
-        private void RemoveAllModifiers() {
-            foreach (var stat in _passiveStats) {
-                stat.RemoveAllModifiers();
-            }
         }
 
         public void UpdateGraphics() {
@@ -137,14 +131,6 @@ namespace Passive {
 
         public RectTransform GetRectTransform() {
             return _rectTransform;
-        }
-
-        public void AddStat(PassiveStat passiveStat) {
-            _passiveStats.Add(passiveStat);
-        }
-
-        public void RemoveStat(PassiveStat passiveStat) {
-            _passiveStats.Remove(passiveStat);
         }
 
         public void SetGraphics(PassiveNodeGraphics passiveNodeGraphics) {

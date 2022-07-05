@@ -17,15 +17,22 @@ namespace Passive {
 
         private void Awake() {
             _passiveNode = gameObject.GetComponent<PassiveNode>();
-            _passiveNode.AddStat(this);
+            _passiveNode.NodeActions += ChangeAllModifiers;
         }
 
         private void OnDestroy() {
             if(!_passiveNode) return;
-            _passiveNode.RemoveStat(this);
+            _passiveNode.NodeActions -= ChangeAllModifiers;
         }
 
-        public void RegisterAllModifiers() {
+        private void ChangeAllModifiers(bool allocated) {
+            if (allocated)
+                RegisterAllModifiers();
+            else
+                RemoveAllModifiers();
+        }
+
+        private void RegisterAllModifiers() {
             if (!stat) return;
             foreach (var sf in statFlats) {
                 stat.RegisterModifier(sf);
@@ -40,7 +47,7 @@ namespace Passive {
             }
         }
 
-        public void RemoveAllModifiers() {
+        private void RemoveAllModifiers() {
             if (!stat) return;
             foreach (var sf in statFlats) {
                 stat.RemoveModifier(sf);
