@@ -10,7 +10,6 @@ using Util;
 namespace Passive {
     [ExecuteAlways]
     public class PassiveNode : MonoBehaviour {
-        public delegate void NodeAction(bool allocated);
 
         public List<PassiveLink> links;
 
@@ -21,7 +20,6 @@ namespace Passive {
 
         [SerializeField, GetSet("allocated")]
         private bool _allocated;
-
         public bool allocated {
             get { return _allocated;}
             set {
@@ -30,7 +28,19 @@ namespace Passive {
                 UpdateLinks();
             }
         }
-        public int neighbourNeeded = 1;
+
+        public NodeAction NeighbourVigil = b => { };
+
+        [SerializeField, GetSet("neighbourNeeded")]
+        private int _neighbourNeeded = 1;
+        public int neighbourNeeded {
+            get { return _neighbourNeeded;}
+            set {
+                _neighbourNeeded = value;
+                NeighbourVigil(allocated);
+            }
+        }
+        
         public int id;
 
         // Start is called before the first frame update
@@ -92,7 +102,7 @@ namespace Passive {
 
         private static bool ReachesRoot(PassiveNode passiveNode, Dictionary<int, bool> searchedPoints) {
             if (searchedPoints.TryGetValue(passiveNode.GetInstanceID(), out var canReach)) return canReach;
-            if (passiveNode.neighbourNeeded == 0) return true;
+            if (passiveNode.neighbourNeeded <= 0) return true;
 
             searchedPoints.Add(passiveNode.GetInstanceID(), false);
             foreach (PassiveLink link in passiveNode.links) {
@@ -109,6 +119,8 @@ namespace Passive {
         public RectTransform GetRectTransform() {
             return _rectTransform;
         }
+        
+        public delegate void NodeAction(bool allocated);
     }
 
     public enum NodeState {

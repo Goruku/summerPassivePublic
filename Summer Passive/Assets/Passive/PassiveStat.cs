@@ -20,7 +20,7 @@ namespace Passive {
             _passiveNode.NodeActions += ChangeAllModifiers;
         }
 
-        private void OnDestroy() {
+        private void OnDisable() {
             if(!_passiveNode) return;
             _passiveNode.NodeActions -= ChangeAllModifiers;
         }

@@ -58,7 +58,7 @@ MonoBehaviour:
   links: []
   passiveName: Point
   _allocated: 0
-  neighbourNeeded: 1
+  _neighbourNeeded: 1
   id: 0
 --- !u!114 &499988912431741092
 MonoBehaviour:
@@ -72,7 +72,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9930056a5e147f89c79c0f19f593513, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tooltipPrefab: {fileID: 5930368226391283592}
+  tooltipPrefab: {fileID: 4846339167949176160, guid: 251f5958fe1e8194cb7dfd21382578a0, type: 3}
+  overloadName: 
   nameText: Point
   descriptionText: 
   textGUI: {fileID: 5930368226391283598}

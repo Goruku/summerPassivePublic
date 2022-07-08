@@ -35,7 +35,7 @@ namespace Passive {
             _passiveNode.NodeActions += UpdateGraphics;
         }
 
-        private void OnDestroy() {
+        private void OnDisable() {
             _passiveNode.NodeActions -= UpdateGraphics;
         }
 
