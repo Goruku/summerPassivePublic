@@ -1,40 +1,84 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using JetBrains.Annotations;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using Util;
 
 namespace Passive {
     [RequireComponent(typeof(PassiveTree))]
+    [ExecuteAlways]
     public class PassiveTreeEntry : MonoBehaviour {
+
+        [SerializeField, GetSet("active")]
+        private bool _active;
+
+        public bool active {
+            get => _active;
+            set {
+                _active = value;
+                if (!enabled) return;
+                foreach (var node in passiveNodes) {
+                    node.neighbourNeeded += _active ? -1 : 1;
+                    PrefabUtility.RecordPrefabInstancePropertyModifications(node);
+                }
+            }
+        }
 
         [Serialize]
         public ObservableList<PassiveNode> passiveNodes = new ();
-
-        // Start is called before the first frame update
+        
         void Start() {
             passiveNodes.ItemAdded += node => {
-                if (node != null)
-                    Debug.Log(node.name);
+                SwitchOnWithActive(node, enabled);
+            };
+            passiveNodes.ItemRemoved += node => {
+                SwitchOffWithActive(node, enabled);
             };
         }
 
-        // Update is called once per frame
+        private void OnEnable() {
+            foreach (var node in passiveNodes) {
+                SwitchOnWithActive(node);
+            }
+        }
+
+        private void OnDisable() {
+            foreach (var node in passiveNodes) {
+                SwitchOffWithActive(node);
+            }
+        }
+        
         void Update()
         {
             passiveNodes.UpdateSerializationCallbacks();
         }
+
+        private void SwitchOnWithActive(PassiveNode node, bool guardFalse = true) {
+            if (!guardFalse) return;
+            node.neighbourNeeded += active ? -1 : 0;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(node);
+        }
+        
+        private void SwitchOffWithActive(PassiveNode node, bool guardFalse = true) {
+            if (!guardFalse) return;
+            node.neighbourNeeded += active ? 1 : 0;
+            PrefabUtility.RecordPrefabInstancePropertyModifications(node);
+        }
     }
 
     [Serializable]
-    public class ObservableList<T> : IList<T>, INotifyCollectionChanged<T>, ISerializationCallbackReceiver {
+    public class ObservableList<T> : IList<T>, INotifyCollectionChanged<T>, 
+        #if UNITY_EDITOR
+        ISerializationCallbackReceiver 
+        #endif
+        {
 
+        #if UNITY_EDITOR
         [SerializeField]
-        private List<T> serializedListPreview = new();
+        private List<T> serializedListInterface = new();
+        #endif
         private List<T> _list = new ();
         
         private Queue<T> _changeAdded = new();
@@ -44,32 +88,31 @@ namespace Passive {
         public event Action<T> ItemRemoved = new Action<T>(obj => {});
         public event Action CollectionChanged = new Action(() => { });
 
+        
+        #if UNITY_EDITOR
         public void OnBeforeSerialize() {
-            serializedListPreview.Clear();
-            serializedListPreview = new List<T>(_list);
+            serializedListInterface.Clear();
+            serializedListInterface = new List<T>(_list);
         }
         
         public void OnAfterDeserialize() {
-
-            bool changed = false;
+            
             foreach (var item in _list) {
-                if (!serializedListPreview.Contains(item)) {
+                if (!serializedListInterface.Contains(item)) {
                     _changeRemoved.Enqueue(item);
-                    changed = true;
                 }
             }
-            foreach (var item in serializedListPreview) {
+            foreach (var item in serializedListInterface) {
                 if (!_list.Contains(item)) {
                     _changeAdded.Enqueue(item);
                 }
-                changed = true;
             }
-            if (changed) CollectionChanged();
-            _list = new List<T>(serializedListPreview);
+            _list = new List<T>(serializedListInterface);
         }
+        #endif
 
         public void UpdateSerializationCallbacks() {
-            if (_changeAdded.Count <= 0 || _changeRemoved.Count <= 0) return ;
+            if (_changeAdded.Count <= 0 && _changeRemoved.Count <= 0) return ;
             
             while (_changeAdded.Count > 0) {
                 ItemAdded(_changeAdded.Dequeue());
@@ -114,7 +157,11 @@ namespace Passive {
             CollectionChanged.Invoke();
         }
 
-        public void Clear() { _list.Clear(); }
+        public void Clear() {
+            foreach (var item in _list) {
+                Remove(item);
+            }
+        }
 
         public bool Contains(T item) { return _list.Contains(item); }
 
@@ -132,9 +179,12 @@ namespace Passive {
 
         public T this[int index]
         {
-            get { return _list[index]; }
+            get => _list[index];
             set {
-                _list[index] = value; 
+                var item = _list[index];
+                _list[index] = value;
+                ItemRemoved(item);
+                ItemAdded(value);
                 CollectionChanged.Invoke();
             }
         }
