@@ -9,12 +9,12 @@ using UnityEngine;
 using System.Linq;
 using Object = UnityEngine.Object;
 
-[CustomEditor(typeof(PassiveTree))]
+[CustomEditor(typeof(PTree))]
 public class LinkManagerEditor : Editor {
     public override void OnInspectorGUI() {
         DrawDefaultInspector();
             
-        PassiveTree localTarget = (PassiveTree)target;
+        PTree localTarget = (PTree)target;
         if (GUILayout.Button("Force Update")) {
             localTarget.UpdateLinks();
             localTarget.UpdateNodes();
@@ -27,18 +27,18 @@ public class LinkManagerEditor : Editor {
 }
 
 [ExecuteAlways]
-public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
+public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     public Object linkPrefab;
     public Transform linkContainer;
 
     public bool editLinks;
     public List<PassiveLinkSetting> _passiveLinks;
-    public List<PassiveLink> linkPool = new ();
+    public List<PLink> linkPool = new ();
     private bool _deserialized;
     
-    public List<PassiveNode> _passiveNodes;
-    private Dictionary<int, PassiveNode> passiveNodes = new ();
+    public List<PNode> _passiveNodes;
+    private Dictionary<int, PNode> passiveNodes = new ();
     
     public void OnBeforeSerialize() {
         _passiveNodes.Clear();
@@ -48,7 +48,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
     }
 
     public void OnAfterDeserialize() {
-        passiveNodes = new Dictionary<int, PassiveNode>();
+        passiveNodes = new Dictionary<int, PNode>();
         int keyCount = 0;
         foreach (var passiveNode in _passiveNodes) {
             if (passiveNode != null) {
@@ -85,7 +85,7 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         }
         
         foreach (var passiveNode in _passiveNodes) {
-            var passiveUI = passiveNode.GetComponent<PassiveNodeUI>();
+            var passiveUI = passiveNode.GetComponent<PNodeUI>();
             if (passiveUI) {
                 passiveUI.overloadName = editLinks ? passiveNode.id.ToString() : "";
             }
@@ -111,10 +111,10 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
             if (linkPool.Count < _passiveLinks.Count) {
                 #if UNITY_EDITOR
                 if (!Application.isPlaying) { 
-                    linkPool.Add(PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>());
+                    linkPool.Add(PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PLink>());
                 } else
                 #endif
-                linkPool.Add(Instantiate(linkPrefab, linkContainer.transform).GetComponent<PassiveLink>());
+                linkPool.Add(Instantiate(linkPrefab, linkContainer.transform).GetComponent<PLink>());
             }
             else {
                 var link = linkPool[0];
@@ -156,33 +156,33 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
         }
     }
     
-    private PassiveLink PushSettingsToLink(PassiveLinkSetting plr, PassiveLink passiveLink) {
-        if (!passiveNodes.TryGetValue(plr.left, out passiveLink.left))
+    private PLink PushSettingsToLink(PassiveLinkSetting plr, PLink pLink) {
+        if (!passiveNodes.TryGetValue(plr.left, out pLink.left))
             throw new NullReferenceException($"Left node \"{plr.left}\" couldn't be found");
-        if (!passiveNodes.TryGetValue(plr.right, out passiveLink.right))
+        if (!passiveNodes.TryGetValue(plr.right, out pLink.right))
             throw new NullReferenceException($"Right node \"{plr.right}\" couldn't be found");
         
-        passiveLink.travels = plr.travels;
-        passiveLink.direction = plr.direction;
-        passiveLink.mandatory = plr.mandatory;
+        pLink.travels = plr.travels;
+        pLink.direction = plr.direction;
+        pLink.mandatory = plr.mandatory;
 
-        passiveLink.left.links.Add(passiveLink);
-        passiveLink.right.links.Add(passiveLink);
+        pLink.left.links.Add(pLink);
+        pLink.right.links.Add(pLink);
         
-        passiveLink.UpdateState();
-        passiveLink.UpdateDimension();
+        pLink.UpdateState();
+        pLink.UpdateDimension();
         
         #if UNITY_EDITOR
-        PrefabUtility.RecordPrefabInstancePropertyModifications(passiveLink);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(pLink);
         #endif
 
-        return passiveLink;
+        return pLink;
     }
 
-    private PassiveLink PushSettingsToLink(PassiveLinkSetting plr, PassiveLink passiveLink, String name) {
-        passiveLink = PushSettingsToLink(plr, passiveLink);
-        passiveLink.gameObject.name = name;
-        return passiveLink;
+    private PLink PushSettingsToLink(PassiveLinkSetting plr, PLink pLink, String name) {
+        pLink = PushSettingsToLink(plr, pLink);
+        pLink.gameObject.name = name;
+        return pLink;
     }
 
     [Serializable]
@@ -205,8 +205,8 @@ public class PassiveTree : MonoBehaviour, ISerializationCallbackReceiver {
 
     [Serializable]
     public struct TreeLink {
-        public PassiveNode left;
+        public PNode left;
         public PassiveLinkSetting linkSetting;
-        public PassiveNode right;
+        public PNode right;
     }
 }

@@ -5,13 +5,13 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Passive {
-    [RequireComponent(typeof(PassiveNode))]
+    [RequireComponent(typeof(PNode))]
     [RequireComponent(typeof(Button))]
     [ExecuteAlways]
-    public class PassiveNodeUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler{
+    public class PNodeUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler{
         
         public GameObject tooltipPrefab;
-        private PassiveTooltip _passiveTooltip;
+        private PTooltip _pTooltip;
 
         public string overloadName = "";
 
@@ -25,18 +25,18 @@ namespace Passive {
         public int hoverDuration;
 
         private RectTransform _rectTransform;
-        private PassiveNode _passiveNode;
+        private PNode _pNode;
         private Button _button;
 
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
-            _passiveNode = GetComponent<PassiveNode>();
+            _pNode = GetComponent<PNode>();
             _button = GetComponent<Button>();
-            _passiveNode.NodeActions += UpdateGraphics;
+            _pNode.NodeActions += UpdateGraphics;
         }
 
         private void OnDisable() {
-            _passiveNode.NodeActions -= UpdateGraphics;
+            _pNode.NodeActions -= UpdateGraphics;
         }
 
 
@@ -47,17 +47,17 @@ namespace Passive {
         public void OnPointerEnter(PointerEventData eventData) {
             if (!Application.isPlaying) return;
             hovered = true;
-            _passiveTooltip = Instantiate(tooltipPrefab, transform).GetComponent<PassiveTooltip>();
-            _passiveTooltip.rectTransform.anchoredPosition +=
-                new Vector2(_passiveTooltip.rectTransform.sizeDelta.x * 0.5f + _rectTransform.sizeDelta.x * 0.5f, 0);
-            _passiveTooltip.header.text = nameText;
-            _passiveTooltip.description.text = descriptionText;
+            _pTooltip = Instantiate(tooltipPrefab, transform).GetComponent<PTooltip>();
+            _pTooltip.rectTransform.anchoredPosition +=
+                new Vector2(_pTooltip.rectTransform.sizeDelta.x * 0.5f + _rectTransform.sizeDelta.x * 0.5f, 0);
+            _pTooltip.header.text = nameText;
+            _pTooltip.description.text = descriptionText;
         }
 
         public void OnPointerExit(PointerEventData eventData) {
             if (!Application.isPlaying) return;
             hovered = false;
-            Destroy(_passiveTooltip.gameObject);
+            Destroy(_pTooltip.gameObject);
         }
 
         public void UpdateGraphics(bool allocated) {
@@ -66,7 +66,7 @@ namespace Passive {
             colors.normalColor = nodeState.Color();
             colors.selectedColor = nodeState.Color();
             _button.colors = colors;
-            textGUI.text = overloadName == "" ?  _passiveNode.passiveName : overloadName;
+            textGUI.text = overloadName == "" ?  _pNode.passiveName : overloadName;
         }
 
         private NodeState ComputeState(bool allocated) {

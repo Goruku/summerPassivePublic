@@ -9,9 +9,9 @@ using Util;
 
 namespace Passive {
     [ExecuteAlways]
-    public class PassiveNode : MonoBehaviour {
+    public class PNode : MonoBehaviour {
 
-        public List<PassiveLink> links;
+        public List<PLink> links;
 
         public string passiveName = "";
         public NodeAction NodeActions = b => { };
@@ -60,7 +60,7 @@ namespace Passive {
         }
 
         private void UpdateLinks() {
-            foreach (PassiveLink link in links) {
+            foreach (PLink link in links) {
                 link.UpdateState();
             }
         }
@@ -100,20 +100,20 @@ namespace Passive {
             return neighbourCount;
         }
 
-        private static bool ReachesRoot(PassiveNode passiveNode, Dictionary<int, bool> searchedPoints) {
-            if (searchedPoints.TryGetValue(passiveNode.GetInstanceID(), out var canReach)) return canReach;
-            if (passiveNode.neighbourNeeded <= 0) return true;
+        private static bool ReachesRoot(PNode pNode, Dictionary<int, bool> searchedPoints) {
+            if (searchedPoints.TryGetValue(pNode.GetInstanceID(), out var canReach)) return canReach;
+            if (pNode.neighbourNeeded <= 0) return true;
 
-            searchedPoints.Add(passiveNode.GetInstanceID(), false);
-            foreach (PassiveLink link in passiveNode.links) {
+            searchedPoints.Add(pNode.GetInstanceID(), false);
+            foreach (PLink link in pNode.links) {
                 if (!link.travels) continue;
-                PassiveNode childNode = link.GetLinkedPoint(passiveNode);
+                PNode childNode = link.GetLinkedPoint(pNode);
                 if (!childNode.allocated || !ReachesRoot(childNode, searchedPoints)) continue;
-                searchedPoints[passiveNode.GetInstanceID()] = true;
+                searchedPoints[pNode.GetInstanceID()] = true;
                 break;
             }
 
-            return searchedPoints[passiveNode.GetInstanceID()];
+            return searchedPoints[pNode.GetInstanceID()];
         }
 
         public RectTransform GetRectTransform() {

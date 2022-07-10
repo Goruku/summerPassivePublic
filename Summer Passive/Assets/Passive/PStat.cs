@@ -5,24 +5,24 @@ using UnityEngine;
 
 
 namespace Passive {
-    [RequireComponent(typeof(PassiveNode))]
+    [RequireComponent(typeof(PNode))]
     [ExecuteAlways]
-    public class PassiveStat : MonoBehaviour {
+    public class PStat : MonoBehaviour {
         public Stat stat;
         public List<StatFlat> statFlats;
         public List<StatIncrease> statIncreases;
         public List<StatMore> statMores;
 
-        private PassiveNode _passiveNode;
+        private PNode _pNode;
 
         private void Awake() {
-            _passiveNode = gameObject.GetComponent<PassiveNode>();
-            _passiveNode.NodeActions += ChangeAllModifiers;
+            _pNode = gameObject.GetComponent<PNode>();
+            _pNode.NodeActions += ChangeAllModifiers;
         }
 
         private void OnDisable() {
-            if(!_passiveNode) return;
-            _passiveNode.NodeActions -= ChangeAllModifiers;
+            if(!_pNode) return;
+            _pNode.NodeActions -= ChangeAllModifiers;
         }
 
         private void ChangeAllModifiers(bool allocated) {
