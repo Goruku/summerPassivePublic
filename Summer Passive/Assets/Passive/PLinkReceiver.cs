@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using Passive;
+using Unity.VisualScripting;
 using UnityEngine;
 using Util;
 
@@ -10,6 +8,7 @@ public class PLinkReceiver : MonoBehaviour {
 
     public int entry;
 
+    [Serialize]
     public SObservableList<PNode> passiveNodes = new ();
     public RectTransform linkContainer;
 
@@ -29,6 +28,6 @@ public class PLinkReceiver : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        
+        passiveNodes.UpdateSerializationCallbacks();
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using StatUtil;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -62,11 +63,15 @@ namespace Passive {
         public bool RegisterLink(PLink link) {
             if (links.Contains(link)) return false;
             links.Add(link);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
             return true;
         }
 
         public bool UnregisterLink(PLink link) {
-            return links.Remove(link);
+            var rLink = links.Remove(link);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            return rLink;
+
         }
 
         private bool CheckAvailability() {

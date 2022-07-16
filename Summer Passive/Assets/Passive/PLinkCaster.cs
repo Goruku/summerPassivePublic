@@ -9,13 +9,17 @@ using Util;
 namespace Passive {
     [RequireComponent(typeof(PNode))]
     [ExecuteAlways]
-    public class PLinkCaster : MonoBehaviour {
+    public class PLinkCaster : MonoBehaviour, ISerializationCallbackReceiver {
 
         public GameObject linkPrefab;
 
         [Serialize]
         public PLinkReceiver linkReceiver;
         private Dictionary<PNode, PLink> matchedLink = new ();
+        [SerializeField, HideInInspector]
+        private List<PNode> _matchedLinkKeys = new();
+        [SerializeField, HideInInspector]
+        private List<PLink> _matchedLinkValues = new();
 
         private PNode _casterNode;
 
@@ -25,6 +29,22 @@ namespace Passive {
         private void Awake() {
             _casterNode = GetComponent<PNode>();
 
+        }
+
+        public void OnBeforeSerialize() {
+            _matchedLinkKeys.Clear();
+            _matchedLinkValues.Clear();
+            foreach (var kvp in matchedLink) {
+                _matchedLinkKeys.Add(kvp.Key);
+                _matchedLinkValues.Add(kvp.Value);
+            }
+        }
+
+        public void OnAfterDeserialize() {
+            matchedLink = new Dictionary<PNode, PLink>();
+            for (int i = 0; i < _matchedLinkKeys.Count && i < _matchedLinkValues.Count; i++) {
+                matchedLink.Add(_matchedLinkKeys[i], _matchedLinkValues[i]);
+            }
         }
 
         private void OnDestroy() {
@@ -40,7 +60,7 @@ namespace Passive {
         // Update is called once per frame
         void Update()
         {
-            linkReceiver.passiveNodes.UpdateSerializationCallbacks();
+
         }
 
         private void OnEnable() {
