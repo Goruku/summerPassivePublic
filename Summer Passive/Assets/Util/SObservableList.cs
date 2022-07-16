@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
 
 namespace Util {
     [Serializable]
-    public class SObservableList<T> : ObservableCollection<T>
+    public class SObservableList<T> : IList<T>, INotifyCollectionChanged<T>
 #if UNITY_EDITOR
         , ISerializationCallbackReceiver 
 #endif
@@ -16,33 +21,36 @@ namespace Util {
         private List<T> serializedListInterface = new();
 #endif
 
+        [Serialize]
         private Queue<T> _changeAdded = new();
+        [Serialize]
         private Queue<T> _changeRemoved = new();
-
-        private IList<T> _items;
-        protected new IList<T> Items {
-            get => _items;
-            set => _items = value;
-        }
+        
+        public event Action<T> ItemAdded = new Action<T>(obj => {});
+        public event Action<T> ItemRemoved = new Action<T>(obj => {});
+        public event Action CollectionChanged = new Action(() => { });
+        
+        [SerializeField, HideInInspector]
+        private List<T> _items = new List<T>();
+        
 #if UNITY_EDITOR
         public void OnBeforeSerialize() {
             serializedListInterface.Clear();
-            serializedListInterface = new List<T>(Items);
+            serializedListInterface = new List<T>(_items);
         }
         
         public void OnAfterDeserialize() {
-            
             foreach (var item in this) {
                 if (!serializedListInterface.Contains(item)) {
                     _changeRemoved.Enqueue(item);
                 }
             }
             foreach (var item in serializedListInterface) {
-                if (!Contains(item)) {
+                if (!_items.Contains(item)) {
                     _changeAdded.Enqueue(item);
                 }
             }
-            Items = new List<T>(serializedListInterface);
+            _items = new List<T>(serializedListInterface);
         }
 #endif
 
@@ -50,10 +58,10 @@ namespace Util {
             if (_changeAdded.Count <= 0 && _changeRemoved.Count <= 0) return ;
             
             while (_changeAdded.Count > 0) {
-                Add(_changeAdded.Dequeue());
+                ItemAdded(_changeAdded.Dequeue());
             }
             while (_changeRemoved.Count > 0) {
-                Remove(_changeRemoved.Dequeue());
+                ItemRemoved(_changeRemoved.Dequeue());
             }
         }
 
@@ -63,6 +71,68 @@ namespace Util {
 
         public T[] GetDiffRemoved() {
             return _changeRemoved.ToArray();
+        }
+
+        public void SetItemsNoCallback(List<T> list) {
+            _items = list;
+        }
+        
+        public void Add(T item) {
+            _items.Add(item);
+            ItemAdded(item);
+            CollectionChanged.Invoke();
+        }
+
+        public bool Remove(T item) {
+            var result = _items.Remove(item);
+            ItemRemoved(item);
+            CollectionChanged.Invoke();
+            return result;
+        }
+
+        public void Insert(int index, T item) {
+            _items.Insert(index, item);
+            ItemAdded.Invoke(item);
+            CollectionChanged.Invoke();
+        }
+
+        public void RemoveAt(int index) {
+            var item = _items[index];
+            _items.RemoveAt(index);
+            ItemRemoved(item);
+            CollectionChanged.Invoke();
+        }
+
+        public void Clear() {
+            foreach (var item in _items) {
+                Remove(item);
+            }
+        }
+
+        public bool Contains(T item) { return _items.Contains(item); }
+
+        public void CopyTo(T[] array, int arrayIndex) { _items.CopyTo(array, arrayIndex); }
+
+        public int Count { get => _items.Count; }
+
+        //TODO: wtf
+        public bool IsReadOnly { get => false; }
+
+        public IEnumerator<T> GetEnumerator() { return _items.GetEnumerator(); }
+        IEnumerator IEnumerable.GetEnumerator() { return _items.GetEnumerator(); }
+
+        public int IndexOf(T item) { return _items.IndexOf(item); }
+
+        public T this[int index]
+        {
+            get => _items[index];
+            set {
+                var item = _items[index];
+                _items[index] = value;
+                ItemRemoved(item);
+                ItemAdded(value);
+                CollectionChanged.Invoke();
+            }
         }
     }
 }

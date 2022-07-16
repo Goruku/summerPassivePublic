@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using Passive;
 using TMPro;
 using Unity.VisualScripting;
@@ -7,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 
 using System.Linq;
+using Util;
 using Object = UnityEngine.Object;
 
 [CustomEditor(typeof(PTree))]
@@ -26,6 +28,7 @@ public class LinkManagerEditor : Editor {
     }
 }
 
+[Serializable]
 [ExecuteAlways]
 public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
 
@@ -33,17 +36,33 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
     public Transform linkContainer;
 
     public bool editLinks;
-    public List<PassiveLinkSetting> _passiveLinks;
-    public List<PLink> linkPool = new ();
-    private bool _deserialized;
     
+    [Serialize]
+    private Dictionary<PassiveLinkSetting, PLink> _links = new ();
+    [SerializeField, HideInInspector]
+    private List<PassiveLinkSetting> _linkKeys = new ();
+    [SerializeField, HideInInspector]
+    private List<PLink> _linkValues = new ();
+    
+    public SObservableList<PassiveLinkSetting> _passiveLinks;
+    
+    private bool _deserialized;
+
     public List<PNode> _passiveNodes;
     private Dictionary<int, PNode> passiveNodes = new ();
+
+    private bool _enableOnce;
     
     public void OnBeforeSerialize() {
         _passiveNodes.Clear();
         foreach (var kvp in passiveNodes) {
             _passiveNodes.Add(kvp.Value);
+        }
+        _linkKeys.Clear();
+        _linkValues.Clear();
+        foreach (var kvp in _links) {
+            _linkKeys.Add(kvp.Key);
+            _linkValues.Add(kvp.Value);
         }
     }
 
@@ -57,30 +76,69 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
             passiveNodes.Add(keyCount, passiveNode); 
             keyCount++;
         }
+
+        _links = new Dictionary<PassiveLinkSetting, PLink>();
+        for (int i = 0; i < _linkKeys.Count && i < _linkValues.Count; i++) {
+            _links.Add(_linkKeys[i], _linkValues[i]);
+        }
+        
         _deserialized = true;
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
+    private void Start() {
+        
+    }
 
+    private void OnEnable() {
+        _passiveLinks.ItemAdded += AddLink;
+        _passiveLinks.ItemRemoved += RemoveLink;
+    }
+
+    private void OnDisable() {
+        _passiveLinks.ItemAdded -= AddLink;
+        _passiveLinks.ItemRemoved -= RemoveLink;
+    }
+
+    private void AddLink(PassiveLinkSetting pls) {
+        DestroyExistingLink(pls);
+        var link = PushSettingsToLink(pls,
+            PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PLink>());
+        link.left.RegisterLink(link);
+        link.right.RegisterLink(link);
+        _links.Add(pls, link);
+        PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
+    }
+
+    private void RemoveLink(PassiveLinkSetting pls) {
+        if (_links.Remove(pls, out PLink link)) {
+            link.left.UnregisterLink(link);
+            link.right.UnregisterLink(link);
+            if (!Application.isPlaying)
+                DestroyImmediate(link.gameObject);
+            else Destroy(link.gameObject);
+        }
+        PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
+    }
+
+    private void DestroyExistingLink(PassiveLinkSetting pls) {
+        if (_links.Remove(pls, out PLink link)) {
+            if (!Application.isPlaying)
+                DestroyImmediate(link.gameObject);
+            else Destroy(link.gameObject);
+        }
     }
 
     // Update is called once per frame
     void Update() {
+
         if (!_deserialized) return;
+        _passiveLinks.UpdateSerializationCallbacks();
+        
         if (editLinks) {
 
-            ManageLinkPool();
-
             for (int i = 0; i < _passiveNodes.Count; i++) {
-                _passiveNodes[i].links.Clear();
                 _passiveNodes[i].gameObject.name = $"{_passiveNodes[i].passiveName} ({i})";
-            }
-            for (int i = 0; i < _passiveLinks.Count; i++) {
-                var passiveLink =  linkPool[i];
-                PassiveLinkSetting plr = _passiveLinks[i];
-                PushSettingsToLink(plr, passiveLink, $"({plr.left},{plr.right})");
             }
         }
         
@@ -90,41 +148,11 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
                 passiveUI.overloadName = editLinks ? passiveNode.id.ToString() : "";
             }
             passiveNode.NodeActions(passiveNode.allocated);
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
             #endif
         }
         _deserialized = false;
-    }
-
-    private void ManageLinkPool() {
-        if (linkPool.Count != linkContainer.childCount) {
-            linkPool.Clear();
-            for (var i = linkContainer.childCount - 1; i >= 0; i--) {
-                if (Application.isPlaying)
-                    Destroy(linkContainer.GetChild(i).gameObject);
-                else
-                    DestroyImmediate(linkContainer.GetChild(i).gameObject);
-            }
-        }
-        while (linkPool.Count != _passiveLinks.Count) {
-            if (linkPool.Count < _passiveLinks.Count) {
-                #if UNITY_EDITOR
-                if (!Application.isPlaying) { 
-                    linkPool.Add(PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PLink>());
-                } else
-                #endif
-                linkPool.Add(Instantiate(linkPrefab, linkContainer.transform).GetComponent<PLink>());
-            }
-            else {
-                var link = linkPool[0];
-                linkPool.RemoveAt(0);
-                if (Application.isPlaying)
-                    Destroy(link.gameObject);
-                else
-                    DestroyImmediate(link);
-            }
-        }
     }
 
     public void SortLinkInterface() {
@@ -139,12 +167,12 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
             }
         }
         var sortedDict = from entry in _passiveLinks orderby entry.left, entry.right select entry;
-        _passiveLinks = sortedDict.ToList();
+        _passiveLinks.SetItemsNoCallback(sortedDict.ToList());
         UpdateLinks();
     }
 
     public void UpdateLinks() {
-        foreach (var link in linkPool) {
+        foreach (var link in _links.Values) {
             link.UpdateDimension();
             link.UpdateState();
         }
@@ -200,6 +228,15 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
             this.right = right;
             this.direction = direction;
             this.mandatory = mandatory;
+        }
+
+        public bool Equals(PassiveLinkSetting obj) {
+            return travels == obj.travels && left == obj.left && right == obj.right && direction.Equals(obj.direction)
+                   && mandatory == obj.mandatory;
+        }
+
+        public override int GetHashCode() {
+            return (travels, left, right, direction, mandatory).GetHashCode();
         }
     }
 

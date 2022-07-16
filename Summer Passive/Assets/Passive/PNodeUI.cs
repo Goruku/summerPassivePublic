@@ -32,6 +32,9 @@ namespace Passive {
             _rectTransform = GetComponent<RectTransform>();
             _pNode = GetComponent<PNode>();
             _button = GetComponent<Button>();
+        }
+
+        private void OnEnable() {
             _pNode.NodeActions += UpdateGraphics;
         }
 

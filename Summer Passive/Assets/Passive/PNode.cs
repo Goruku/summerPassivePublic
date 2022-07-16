@@ -43,12 +43,6 @@ namespace Passive {
         
         public int id;
 
-        // Start is called before the first frame update
-        private void Start() { }
-
-        // Update is called once per frame
-        private void Update() { }
-
         private void Awake() {
             _rectTransform = GetComponent<RectTransform>();
         }
@@ -63,6 +57,16 @@ namespace Passive {
             foreach (PLink link in links) {
                 link.UpdateState();
             }
+        }
+
+        public bool RegisterLink(PLink link) {
+            if (links.Contains(link)) return false;
+            links.Add(link);
+            return true;
+        }
+
+        public bool UnregisterLink(PLink link) {
+            return links.Remove(link);
         }
 
         private bool CheckAvailability() {

@@ -44,30 +44,51 @@ namespace Passive {
         }
 
         private void OnEnable() {
-            linkReceiver.passiveNodes.CollectionChanged += PassiveNodeModification;
+            linkReceiver.passiveNodes.ItemAdded += AddNode;
+            linkReceiver.passiveNodes.ItemRemoved += RemoveNode;
         }
 
         private void OnDisable() {
-            linkReceiver.passiveNodes.CollectionChanged -= PassiveNodeModification;
+            linkReceiver.passiveNodes.ItemAdded -= AddNode;
+            linkReceiver.passiveNodes.ItemRemoved -= RemoveNode;
+        }
+
+        private void AddNode(PNode node) {
+            if (!node) return; 
+            DestroyExistingNode(node);
+            var link =GenerateLink(_casterNode, node, linkReceiver.linkContainer);
+            matchedLink[node] = link;
+            link.left.RegisterLink(link);
+            link.right.RegisterLink(link);
+        }
+
+        private void RemoveNode(PNode node) {
+            if (!node) return;
+            DestroyExistingNode(node);
         }
 
         private void PassiveNodeModification(System.Object caller, NotifyCollectionChangedEventArgs eventArgs) {
             Debug.Log("Casting change");
             if (eventArgs.NewItems != null)
                 foreach (PNode node in eventArgs.NewItems) {
-                    if (!node) return;
-                        DestroyExistingNode(node);
-                    matchedLink[node] = GenerateLink(_casterNode, node, linkReceiver.linkContainer);
+                    if (!node) return; 
+                    DestroyExistingNode(node);
+                    var link =GenerateLink(_casterNode, node, linkReceiver.linkContainer);
+                    matchedLink[node] = link;
+                    link.left.RegisterLink(link);
+                    link.right.RegisterLink(link);
                 }
             if (eventArgs.OldItems != null)
                 foreach (PNode node in eventArgs.OldItems) {
                     if (!node) return;
-                        DestroyExistingNode(node);
+                    DestroyExistingNode(node);
                 }
         }
 
         private void DestroyExistingNode(PNode node) {
             if (matchedLink.Remove(node, out PLink link)) {
+                link.left.UnregisterLink(link);
+                link.right.UnregisterLink(link);
                 if (!Application.isPlaying)
                     DestroyImmediate(link.gameObject);
                 else Destroy(link.gameObject);

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Passive {
+    [Serializable]
     public class PLink : MonoBehaviour {
 
         public LinkTextureMapper linkTextureMapper;
@@ -89,12 +90,14 @@ namespace Passive {
 
     }
 
+    [Serializable]
     public enum LinkDirection {
         None,
         Left,
         Right,
     }
 
+    [Serializable]
     public enum LinkState {
         Unavailable,
         Available,
