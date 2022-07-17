@@ -93,11 +93,19 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
     private void OnEnable() {
         _passiveLinks.ItemAdded += AddLink;
         _passiveLinks.ItemRemoved += RemoveLink;
+
+        foreach (var link in _passiveLinks) {
+            AddLink(link);
+        }
     }
 
     private void OnDisable() {
         _passiveLinks.ItemAdded -= AddLink;
         _passiveLinks.ItemRemoved -= RemoveLink;
+        
+        foreach (var link in _passiveLinks) {
+            RemoveLink(link);
+        }
     }
 
     private void AddLink(PassiveLinkSetting pls) {
