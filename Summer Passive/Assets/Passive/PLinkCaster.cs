@@ -12,9 +12,10 @@ namespace Passive {
     public class PLinkCaster : MonoBehaviour, ISerializationCallbackReceiver {
 
         public GameObject linkPrefab;
-
+        
         [Serialize]
-        public PLinkReceiver linkReceiver;
+        public SObservableList<PLinkReceiver> linkReceivers;
+
         private Dictionary<PNode, PLink> matchedLink = new ();
         [SerializeField, HideInInspector]
         private List<PNode> _matchedLinkKeys = new();
@@ -58,22 +59,46 @@ namespace Passive {
         }
 
         // Update is called once per frame
-        void Update()
-        {
-
+        void Update() {
+            linkReceivers.UpdateSerializationCallbacks();
         }
 
         private void OnEnable() {
-            linkReceiver.passiveNodes.ItemAdded += AddNode;
-            linkReceiver.passiveNodes.ItemRemoved += RemoveNode;
+            linkReceivers.ItemAdded += RegisterReceiver;
+            linkReceivers.ItemRemoved += UnregisterReceiver;
+            foreach (var linkReceiver in linkReceivers) {
+                RegisterReceiver(linkReceiver);
+            }
         }
 
         private void OnDisable() {
-            linkReceiver.passiveNodes.ItemAdded -= AddNode;
-            linkReceiver.passiveNodes.ItemRemoved -= RemoveNode;
+            linkReceivers.ItemAdded -= RegisterReceiver;
+            linkReceivers.ItemRemoved -= UnregisterReceiver;
+            foreach (var linkReceiver in linkReceivers) {
+                UnregisterReceiver(linkReceiver);
+            }
         }
 
-        private void AddNode(PNode node) {
+        private void RegisterReceiver(PLinkReceiver linkReceiver) {
+            if (!linkReceiver) return;
+            linkReceiver.passiveNodes.ItemAdded += node => AddNode(node, linkReceiver);
+            linkReceiver.passiveNodes.ItemRemoved += RemoveNode;
+            foreach (var node in linkReceiver.passiveNodes) {
+                AddNode(node, linkReceiver);
+            }
+        }
+
+        private void UnregisterReceiver(PLinkReceiver linkReceiver) {
+            if (!linkReceiver) return;
+            //TODO: Delegate list? this seems to work but it's very sketchy
+            linkReceiver.passiveNodes.ItemAdded -= node => AddNode(node, linkReceiver);
+            linkReceiver.passiveNodes.ItemRemoved -= RemoveNode;
+            foreach (var node in linkReceiver.passiveNodes) {
+                RemoveNode(node);
+            }
+        }
+
+        private void AddNode(PNode node, PLinkReceiver linkReceiver) {
             if (!node) return; 
             DestroyExistingNode(node);
             var link =GenerateLink(_casterNode, node, linkReceiver.linkContainer);
@@ -85,24 +110,6 @@ namespace Passive {
         private void RemoveNode(PNode node) {
             if (!node) return;
             DestroyExistingNode(node);
-        }
-
-        private void PassiveNodeModification(System.Object caller, NotifyCollectionChangedEventArgs eventArgs) {
-            Debug.Log("Casting change");
-            if (eventArgs.NewItems != null)
-                foreach (PNode node in eventArgs.NewItems) {
-                    if (!node) return; 
-                    DestroyExistingNode(node);
-                    var link =GenerateLink(_casterNode, node, linkReceiver.linkContainer);
-                    matchedLink[node] = link;
-                    link.left.RegisterLink(link);
-                    link.right.RegisterLink(link);
-                }
-            if (eventArgs.OldItems != null)
-                foreach (PNode node in eventArgs.OldItems) {
-                    if (!node) return;
-                    DestroyExistingNode(node);
-                }
         }
 
         private void DestroyExistingNode(PNode node) {
