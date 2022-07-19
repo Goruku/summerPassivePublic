@@ -22,6 +22,9 @@ namespace Passive {
         [SerializeField, HideInInspector]
         private List<PLink> _matchedLinkValues = new();
 
+        [SerializeField, HideInInspector]
+        private bool wasEnabled;
+
         private PNode _casterNode;
 
         public int entry;
@@ -66,6 +69,9 @@ namespace Passive {
         private void OnEnable() {
             linkReceivers.ItemAdded += RegisterReceiver;
             linkReceivers.ItemRemoved += UnregisterReceiver;
+            
+            if (wasEnabled) return;
+            wasEnabled = true;
             foreach (var linkReceiver in linkReceivers) {
                 RegisterReceiver(linkReceiver);
             }
@@ -74,6 +80,9 @@ namespace Passive {
         private void OnDisable() {
             linkReceivers.ItemAdded -= RegisterReceiver;
             linkReceivers.ItemRemoved -= UnregisterReceiver;
+            
+            if (!wasEnabled) return;
+            wasEnabled = false;
             foreach (var linkReceiver in linkReceivers) {
                 UnregisterReceiver(linkReceiver);
             }

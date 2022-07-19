@@ -44,9 +44,13 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
     [SerializeField, HideInInspector]
     private List<PLink> _linkValues = new ();
     
+    [Serialize]
     public SObservableList<PassiveLinkSetting> _passiveLinks;
     
     private bool _deserialized;
+    
+    [SerializeField, HideInInspector]
+    public bool wasEnabled;
 
     public List<PNode> _passiveNodes;
     private Dictionary<int, PNode> passiveNodes = new ();
@@ -94,18 +98,24 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
         _passiveLinks.ItemAdded += AddLink;
         _passiveLinks.ItemRemoved += RemoveLink;
 
+        if (wasEnabled) return;
+        wasEnabled = true;
         foreach (var link in _passiveLinks) {
             AddLink(link);
         }
+        OverloadNodeUIText();
     }
 
     private void OnDisable() {
         _passiveLinks.ItemAdded -= AddLink;
         _passiveLinks.ItemRemoved -= RemoveLink;
         
+        if (!wasEnabled) return;
+        wasEnabled = false;
         foreach (var link in _passiveLinks) {
             RemoveLink(link);
         }
+        OverloadNodeUIText(edit:false);
     }
 
     private void AddLink(PassiveLinkSetting pls) {
@@ -142,25 +152,21 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
 
         if (!_deserialized) return;
         _passiveLinks.UpdateSerializationCallbacks();
-        
-        if (editLinks) {
 
-            for (int i = 0; i < _passiveNodes.Count; i++) {
-                _passiveNodes[i].gameObject.name = $"{_passiveNodes[i].passiveName} ({i})";
-            }
-        }
-        
-        foreach (var passiveNode in _passiveNodes) {
-            var passiveUI = passiveNode.GetComponent<PNodeUI>();
-            if (passiveUI) {
-                passiveUI.overloadName = editLinks ? passiveNode.id.ToString() : "";
-            }
-            passiveNode.NodeActions(passiveNode.allocated);
-#if UNITY_EDITOR
-            PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNode);
-            #endif
-        }
+        OverloadNodeUIText();
         _deserialized = false;
+    }
+
+    private void OverloadNodeUIText(bool edit = true) {
+        for (int i = 0; i < _passiveNodes.Count; i++) {
+            _passiveNodes[i].gameObject.name = $"{_passiveNodes[i].passiveName} ({i})";
+            var passiveUI = passiveNodes[i].GetComponent<PNodeUI>();
+            if (passiveUI) {
+                passiveUI.overloadName = editLinks && edit ? passiveNodes[i].id.ToString() : "";
+            }
+            passiveNodes[i].NodeActions(passiveNodes[i].allocated);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(passiveNodes[i]);
+        }
     }
 
     public void SortLinkInterface() {
