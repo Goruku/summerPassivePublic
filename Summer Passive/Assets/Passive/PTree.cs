@@ -124,6 +124,7 @@ public class PTree : MonoBehaviour, ISerializationCallbackReceiver {
             PrefabUtility.InstantiatePrefab(linkPrefab, linkContainer.transform).GetComponent<PLink>());
         link.left.RegisterLink(link);
         link.right.RegisterLink(link);
+        link.name = $"Link ({link.left.id}, {link.right.id})";
         _links.Add(pls, link);
         PrefabUtility.RecordPrefabInstancePropertyModifications(gameObject);
     }

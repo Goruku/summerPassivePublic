@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using Util;
 
@@ -69,28 +70,41 @@ namespace Passive {
         private void OnEnable() {
             linkReceivers.ItemAdded += RegisterReceiver;
             linkReceivers.ItemRemoved += UnregisterReceiver;
-            
-            if (wasEnabled) return;
+
+            if (!wasEnabled)
+                foreach (var linkReceiver in linkReceivers) {
+                    if (!linkReceiver) continue;
+                    if (linkReceiver.enabled)
+                        RegisterReceiver(linkReceiver);
+                    linkReceiver.OnAbleChange += HandleRegistrationFromEnable;
+                }
             wasEnabled = true;
-            foreach (var linkReceiver in linkReceivers) {
-                RegisterReceiver(linkReceiver);
-            }
         }
 
         private void OnDisable() {
             linkReceivers.ItemAdded -= RegisterReceiver;
             linkReceivers.ItemRemoved -= UnregisterReceiver;
-            
-            if (!wasEnabled) return;
+
+            if (wasEnabled)
+                foreach (var linkReceiver in linkReceivers) {
+                    if (!linkReceiver) continue;
+                    UnregisterReceiver(linkReceiver);
+                    linkReceiver.OnAbleChange -= HandleRegistrationFromEnable;
+                }
             wasEnabled = false;
-            foreach (var linkReceiver in linkReceivers) {
+        }
+
+        private void HandleRegistrationFromEnable(bool rEnabled, PLinkReceiver linkReceiver) {
+            Debug.Log(rEnabled);
+            if (rEnabled)
+                RegisterReceiver(linkReceiver);
+            else
                 UnregisterReceiver(linkReceiver);
-            }
         }
 
         private void RegisterReceiver(PLinkReceiver linkReceiver) {
             if (!linkReceiver) return;
-            linkReceiver.passiveNodes.ItemAdded += node => AddNode(node, linkReceiver);
+            linkReceiver.NodeAdded += AddNode;
             linkReceiver.passiveNodes.ItemRemoved += RemoveNode;
             foreach (var node in linkReceiver.passiveNodes) {
                 AddNode(node, linkReceiver);
@@ -99,8 +113,7 @@ namespace Passive {
 
         private void UnregisterReceiver(PLinkReceiver linkReceiver) {
             if (!linkReceiver) return;
-            //TODO: Delegate list? this seems to work but it's very sketchy
-            linkReceiver.passiveNodes.ItemAdded -= node => AddNode(node, linkReceiver);
+            linkReceiver.NodeAdded -= AddNode;
             linkReceiver.passiveNodes.ItemRemoved -= RemoveNode;
             foreach (var node in linkReceiver.passiveNodes) {
                 RemoveNode(node);
@@ -123,6 +136,7 @@ namespace Passive {
 
         private void DestroyExistingNode(PNode node) {
             if (matchedLink.Remove(node, out PLink link)) {
+                if (!link) return;
                 link.left.UnregisterLink(link);
                 link.right.UnregisterLink(link);
                 if (!Application.isPlaying)
@@ -132,7 +146,8 @@ namespace Passive {
         }
         
         private PLink GenerateLink(PNode caster, PNode receivingNode, RectTransform linkHolder) {
-            var link = Instantiate(linkPrefab, linkHolder).GetComponent<PLink>();
+            var link = PrefabUtility.InstantiatePrefab(linkPrefab, linkHolder).GetComponent<PLink>();
+            link.name = $"Link (Caster {caster.id}, {receivingNode.id})";
             link.left = caster;
             link.right = receivingNode;
             return link;

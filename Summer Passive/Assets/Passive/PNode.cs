@@ -79,6 +79,7 @@ namespace Passive {
             if (GetNeighbourCount() < neighbourNeeded) return false;
             bool available = false;
             foreach (var link in links) {
+                if (link == null) continue;
                 if (link.IsDependant(this) && !link.GetLinkedPoint(this).allocated) return false;
                 if (!available)
                     available |= link.AllowsTravel();
@@ -90,6 +91,7 @@ namespace Passive {
         private bool CheckIfSafeRemove() {
             Dictionary<int, bool> searchedPoints = new() { { GetInstanceID(), false } };
             foreach (var link in links) {
+                if (link == null) continue;
                 var childNode = link.GetLinkedPoint(this);
                 if (!childNode.allocated) continue;
                 if (childNode.GetNeighbourCount() - 1 < childNode.neighbourNeeded) return false;

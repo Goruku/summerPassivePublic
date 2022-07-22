@@ -1,3 +1,4 @@
+using System;
 using Passive;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -11,6 +12,35 @@ public class PLinkReceiver : MonoBehaviour {
     [Serialize]
     public SObservableList<PNode> passiveNodes = new ();
     public RectTransform linkContainer;
+    public ReceiverDelegateInterface NodeAdded = (node, receiver) => {};
+    public ReceiverDelegateInterface NodeRemoved = (node, receiver) => {};
+    public ReceiverEnabled OnAbleChange = (abled, receiver) => { };
+
+    public delegate void ReceiverDelegateInterface(PNode node, PLinkReceiver receiver);
+
+    public delegate void ReceiverEnabled(bool enabled, PLinkReceiver receiver);
+
+    private void OnEnable() {
+        passiveNodes.ItemAdded += callAdd;
+        passiveNodes.ItemRemoved += callRemove;
+        OnAbleChange(true, this);
+    }
+    
+    private void OnDisable() {
+        passiveNodes.ItemAdded -= callAdd;
+        passiveNodes.ItemRemoved -= callRemove;
+        OnAbleChange(false, this);
+    }
+
+    private void callAdd(PNode node) {
+        NodeAdded(node, this);
+    }
+
+    private void callRemove(PNode node) {
+        NodeRemoved(node, this);
+    }
+
+
 
     private void Awake() {
         if (linkContainer == null) {
