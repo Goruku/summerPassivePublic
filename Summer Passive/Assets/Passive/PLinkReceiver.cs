@@ -11,14 +11,19 @@ public class PLinkReceiver : MonoBehaviour {
 
     [Serialize]
     public SObservableList<PNode> passiveNodes = new ();
-    public RectTransform linkContainer;
     public ReceiverDelegateInterface NodeAdded = (node, receiver) => {};
     public ReceiverDelegateInterface NodeRemoved = (node, receiver) => {};
     public ReceiverEnabled OnAbleChange = (abled, receiver) => { };
+    [HideInInspector]
+    public RectTransform rectTransform;
 
     public delegate void ReceiverDelegateInterface(PNode node, PLinkReceiver receiver);
 
     public delegate void ReceiverEnabled(bool enabled, PLinkReceiver receiver);
+
+    private void Awake() {
+        rectTransform = GetComponent<RectTransform>();
+    }
 
     private void OnEnable() {
         passiveNodes.ItemAdded += callAdd;
@@ -38,15 +43,6 @@ public class PLinkReceiver : MonoBehaviour {
 
     private void callRemove(PNode node) {
         NodeRemoved(node, this);
-    }
-
-
-
-    private void Awake() {
-        if (linkContainer == null) {
-            linkContainer = new GameObject($"linkReceiver ({entry})", typeof(RectTransform)).GetComponent<RectTransform>();
-            linkContainer.SetParent(transform);
-        }
     }
 
     // Start is called before the first frame update

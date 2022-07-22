@@ -95,7 +95,6 @@ namespace Passive {
         }
 
         private void HandleRegistrationFromEnable(bool rEnabled, PLinkReceiver linkReceiver) {
-            Debug.Log(rEnabled);
             if (rEnabled)
                 RegisterReceiver(linkReceiver);
             else
@@ -123,7 +122,7 @@ namespace Passive {
         private void AddNode(PNode node, PLinkReceiver linkReceiver) {
             if (!node) return; 
             DestroyExistingNode(node);
-            var link =GenerateLink(_casterNode, node, linkReceiver.linkContainer);
+            var link =GenerateLink(_casterNode, node, linkReceiver.rectTransform);
             matchedLink[node] = link;
             link.left.RegisterLink(link);
             link.right.RegisterLink(link);

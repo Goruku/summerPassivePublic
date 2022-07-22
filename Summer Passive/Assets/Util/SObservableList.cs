@@ -30,8 +30,12 @@ namespace Util {
         public event Action<T> ItemRemoved = new Action<T>(obj => {});
         public event Action CollectionChanged = new Action(() => { });
         
+        public event Action<int, int> CountChanged = new Action<int, int>((oldCount, newCount) => {});
+        
         [SerializeField, HideInInspector]
         private List<T> _items = new List<T>();
+
+        private int _oldCount;
         
 #if UNITY_EDITOR
         public void OnBeforeSerialize() {
@@ -50,11 +54,17 @@ namespace Util {
                     _changeAdded.Enqueue(item);
                 }
             }
+
+            _oldCount = _items.Count;
             _items = new List<T>(serializedListInterface);
         }
 #endif
 
         public void UpdateSerializationCallbacks() {
+            if (_items.Count != _oldCount) {
+                CountChanged(_oldCount, _items.Count);
+                _oldCount = _items.Count;
+            }
             if (_changeAdded.Count <= 0 && _changeRemoved.Count <= 0) return ;
             
             while (_changeAdded.Count > 0) {
@@ -81,12 +91,14 @@ namespace Util {
             _items.Add(item);
             ItemAdded(item);
             CollectionChanged.Invoke();
+            CountChanged(Count - 1, Count);
         }
 
         public bool Remove(T item) {
             var result = _items.Remove(item);
             ItemRemoved(item);
             CollectionChanged.Invoke();
+            CountChanged(Count + 1, Count);
             return result;
         }
 
@@ -94,6 +106,7 @@ namespace Util {
             _items.Insert(index, item);
             ItemAdded.Invoke(item);
             CollectionChanged.Invoke();
+            CountChanged(Count - 1, Count);
         }
 
         public void RemoveAt(int index) {
@@ -101,12 +114,15 @@ namespace Util {
             _items.RemoveAt(index);
             ItemRemoved(item);
             CollectionChanged.Invoke();
+            CountChanged(Count + 1, Count);
         }
 
         public void Clear() {
+            var oldCount = Count;
             foreach (var item in _items) {
                 Remove(item);
             }
+            CountChanged(oldCount, Count);
         }
 
         public bool Contains(T item) { return _items.Contains(item); }
@@ -133,6 +149,10 @@ namespace Util {
                 ItemAdded(value);
                 CollectionChanged.Invoke();
             }
+        }
+
+        public void SetItemNoCallback(int i, T item) {
+            _items[i] = item;
         }
     }
 }
