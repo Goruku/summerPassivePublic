@@ -14,6 +14,16 @@ namespace Passive {
 
         public GameObject linkPrefab;
         
+        [SerializeField, GetSet("active")]
+        private bool _active;
+        public bool active {
+            get { return _active;}
+            set {
+                _active = value;
+                UpdateMaterialization();
+            }
+        }
+        
         [Serialize]
         public SObservableList<PLinkReceiver> linkReceivers;
 
@@ -119,13 +129,47 @@ namespace Passive {
             }
         }
 
+        private void UpdateMaterialization() {
+            if (active) {
+                MaterializeAllLinks();
+            }
+            else {
+                UnmaterializeAllLinks();
+            }
+        }
+
+        private void MaterializeAllLinks() {
+            foreach (var link in matchedLink.Values) {
+                MaterializeLink(link);
+            }
+        }
+        
+        private void UnmaterializeAllLinks() {
+            foreach (var link in matchedLink.Values) {
+                UnmaterializeLink(link);
+            }
+        }
+
+        private void MaterializeLink(PLink link) {
+            link.left.RegisterLink(link);
+            link.right.RegisterLink(link);
+            link.gameObject.SetActive(true);
+        }
+        
+        private void UnmaterializeLink(PLink link) {
+            link.left.UnregisterLink(link);
+            link.right.UnregisterLink(link);
+            link.gameObject.SetActive(false);
+        }
+
+
+
         private void AddNode(PNode node, PLinkReceiver linkReceiver) {
             if (!node) return; 
             DestroyExistingNode(node);
             var link =GenerateLink(_casterNode, node, linkReceiver.rectTransform);
             matchedLink[node] = link;
-            link.left.RegisterLink(link);
-            link.right.RegisterLink(link);
+            MaterializeLink(link);
         }
 
         private void RemoveNode(PNode node) {
@@ -136,8 +180,7 @@ namespace Passive {
         private void DestroyExistingNode(PNode node) {
             if (matchedLink.Remove(node, out PLink link)) {
                 if (!link) return;
-                link.left.UnregisterLink(link);
-                link.right.UnregisterLink(link);
+                UnmaterializeLink(link);
                 if (!Application.isPlaying)
                     DestroyImmediate(link.gameObject);
                 else Destroy(link.gameObject);
