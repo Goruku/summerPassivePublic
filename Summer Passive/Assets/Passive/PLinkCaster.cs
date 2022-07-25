@@ -20,12 +20,12 @@ namespace Passive {
             get { return _active;}
             set {
                 _active = value;
-                UpdateMaterialization();
+                UpdateAllMaterialization();
             }
         }
         
         [Serialize]
-        public SObservableList<PLinkReceiver> linkReceivers;
+        public SObservableList<PLinkReceiver> linkReceivers = new ();
 
         private Dictionary<PNode, PLink> matchedLink = new ();
         [SerializeField, HideInInspector]
@@ -129,12 +129,21 @@ namespace Passive {
             }
         }
 
-        private void UpdateMaterialization() {
+        private void UpdateAllMaterialization() {
             if (active) {
                 MaterializeAllLinks();
             }
             else {
                 UnmaterializeAllLinks();
+            }
+        }
+
+        private void UpdateMaterialization(PLink link) {
+            if (active) {
+                MaterializeLink(link);
+            }
+            else {
+                UnmaterializeLink(link);
             }
         }
 
@@ -169,7 +178,7 @@ namespace Passive {
             DestroyExistingNode(node);
             var link =GenerateLink(_casterNode, node, linkReceiver.rectTransform);
             matchedLink[node] = link;
-            MaterializeLink(link);
+            UpdateMaterialization(link);
         }
 
         private void RemoveNode(PNode node) {
