@@ -32,6 +32,10 @@ public class PLinkReceiver : MonoBehaviour {
     }
     
     private void OnDisable() {
+        CleanUp();
+    }
+
+    public void CleanUp() {
         passiveNodes.ItemAdded -= callAdd;
         passiveNodes.ItemRemoved -= callRemove;
         OnAbleChange(false, this);

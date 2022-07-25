@@ -76,7 +76,6 @@ namespace Passive {
                     if (!linkReceiver) continue;
                     if (linkReceiver.enabled)
                         RegisterReceiver(linkReceiver);
-                    linkReceiver.OnAbleChange += HandleRegistrationFromEnable;
                 }
             wasEnabled = true;
         }
@@ -89,7 +88,6 @@ namespace Passive {
                 foreach (var linkReceiver in linkReceivers) {
                     if (!linkReceiver) continue;
                     UnregisterReceiver(linkReceiver);
-                    linkReceiver.OnAbleChange -= HandleRegistrationFromEnable;
                 }
             wasEnabled = false;
         }
@@ -105,6 +103,7 @@ namespace Passive {
             if (!linkReceiver) return;
             linkReceiver.NodeAdded += AddNode;
             linkReceiver.passiveNodes.ItemRemoved += RemoveNode;
+            linkReceiver.OnAbleChange += HandleRegistrationFromEnable;
             foreach (var node in linkReceiver.passiveNodes) {
                 AddNode(node, linkReceiver);
             }
@@ -114,6 +113,7 @@ namespace Passive {
             if (!linkReceiver) return;
             linkReceiver.NodeAdded -= AddNode;
             linkReceiver.passiveNodes.ItemRemoved -= RemoveNode;
+            linkReceiver.OnAbleChange -= HandleRegistrationFromEnable;
             foreach (var node in linkReceiver.passiveNodes) {
                 RemoveNode(node);
             }

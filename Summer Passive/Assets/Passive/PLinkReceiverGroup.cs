@@ -27,7 +27,6 @@ namespace  Passive {
 
         private void InstantiateLinkReceiver(int oldCount, int count) {
             if (count <= oldCount) return;
-            Debug.Log("Added");
             var linkContainer = new GameObject($"linkReceiver", typeof(RectTransform)).GetComponent<RectTransform>();
             linkContainer.SetParent(transform);
             var receiver = linkContainer.AddComponent<PLinkReceiver>();
@@ -38,6 +37,7 @@ namespace  Passive {
 
         private void DeleteLinkReceiver(PLinkReceiver linkReceiver) {
             if (!linkReceiver) return;
+            linkReceiver.enabled = false;
             if (!Application.isPlaying)
                 DestroyImmediate(linkReceiver.gameObject);
             else Destroy(linkReceiver.gameObject);
