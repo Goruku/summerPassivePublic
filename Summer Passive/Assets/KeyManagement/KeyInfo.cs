@@ -2,7 +2,9 @@
 using UnityEngine;
 
 namespace KeyManagement {
-    public class KeyInfo : MonoBehaviour {
+    
+    [CreateAssetMenu()]
+    public class KeyInfo : ScriptableObject {
         public KeyCode keyCode;
         public bool held;
         public bool down;
@@ -19,7 +21,7 @@ namespace KeyManagement {
             this.direction = direction;
         }
 
-        public void Update() {
+        public void UpdateKeyInfo() {
             if (Input.GetKeyDown(keyCode)) {
                 lastTimestamp = timestamp;
                 timestamp = Time.time;
