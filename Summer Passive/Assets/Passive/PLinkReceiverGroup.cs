@@ -9,7 +9,7 @@ namespace  Passive {
     public class PLinkReceiverGroup : MonoBehaviour {
     
         [Serialize]
-        public SObservableList<PLinkReceiver> linkReceivers;
+        public SObservableList<PLinkReceiver> linkReceivers = new ();
 
         private void Awake() {
 
@@ -28,7 +28,7 @@ namespace  Passive {
         private void InstantiateLinkReceiver(int oldCount, int count) {
             if (count <= oldCount) return;
             var linkContainer = new GameObject($"linkReceiver", typeof(RectTransform)).GetComponent<RectTransform>();
-            linkContainer.SetParent(transform);
+            linkContainer.SetParent(transform, false);
             var receiver = linkContainer.AddComponent<PLinkReceiver>();
             receiver.name = $"linkReceiver ({count - 1})";
             receiver.entry = count - 1;

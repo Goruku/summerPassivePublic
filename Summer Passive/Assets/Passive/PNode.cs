@@ -89,8 +89,8 @@ namespace Passive {
         }
 
         private bool CheckIfSafeRemove() {
-            Dictionary<int, bool> searchedPoints = new() { { GetInstanceID(), false } };
             foreach (var link in links) {
+                Dictionary<int, bool> searchedPoints = new() { { GetInstanceID(), false } };
                 if (link == null) continue;
                 var childNode = link.GetLinkedPoint(this);
                 if (!childNode.allocated) continue;

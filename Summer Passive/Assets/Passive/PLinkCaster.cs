@@ -36,14 +36,14 @@ namespace Passive {
         [SerializeField, HideInInspector]
         private bool wasEnabled;
 
-        private PNode _casterNode;
+        [HideInInspector]
+        public PNode casterNode;
 
         public int entry;
 
 
         private void Awake() {
-            _casterNode = GetComponent<PNode>();
-
+            casterNode = GetComponent<PNode>();
         }
 
         public void OnBeforeSerialize() {
@@ -163,6 +163,8 @@ namespace Passive {
             link.left.RegisterLink(link);
             link.right.RegisterLink(link);
             link.gameObject.SetActive(true);
+            link.UpdateState();
+            link.UpdateDimension();
         }
         
         private void UnmaterializeLink(PLink link) {
@@ -176,7 +178,7 @@ namespace Passive {
         private void AddNode(PNode node, PLinkReceiver linkReceiver) {
             if (!node) return; 
             DestroyExistingNode(node);
-            var link =GenerateLink(_casterNode, node, linkReceiver.rectTransform);
+            var link =GenerateLink(casterNode, node, linkReceiver.rectTransform);
             matchedLink[node] = link;
             UpdateMaterialization(link);
         }
