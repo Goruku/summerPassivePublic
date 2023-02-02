@@ -14,10 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   restorePlayMode: 1
   baseValue: 0.1
-  calculatedValue: 0.2500000037252903
+  calculatedValue: 0.10000000149011612
   statFlats: []
-  statIncreases:
-  - value: 0.5
-  - value: 0.5
-  - value: 0.5
+  statIncreases: []
   statMores: []

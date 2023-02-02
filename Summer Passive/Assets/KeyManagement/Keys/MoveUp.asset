@@ -17,7 +17,7 @@ MonoBehaviour:
   down: 0
   up: 0
   doubleTap: 0
-  doubleTapWindow: 0
-  timestamp: 29.470337
-  lastTimestamp: 28.273735
+  doubleTapWindow: 0.5
+  timestamp: 107.42781
+  lastTimestamp: 106.29427
   direction: {x: 0, y: 1, z: 0}
