@@ -9,12 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2b8eb1aa2147ab4ea25c872c3dbabb6, type: 3}
-  m_Name: Movement Speed
+  m_Script: {fileID: 11500000, guid: 3aff6c7927e64e908e9217e20670595f, type: 3}
+  m_Name: MoveCombo
   m_EditorClassIdentifier: 
-  restorePlayMode: 1
-  baseValue: 0.1
-  calculatedValue: 0.10000000149011612
-  statFlats: []
-  statIncreases: []
-  statMores: []
+  keyCode: 304
+  held: 0
+  down: 0
+  up: 0
+  doubleTap: 0
+  doubleTapWindow: 0
+  timestamp: 0
+  lastTimestamp: 0
+  direction: {x: 0, y: 0, z: 0}

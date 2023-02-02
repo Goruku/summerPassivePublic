@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Passive {
-    public class PassiveLink : MonoBehaviour {
+    [Serializable]
+    public class PLink : MonoBehaviour {
 
         public LinkTextureMapper linkTextureMapper;
         public bool travels = true;
-        public PassiveNode left;
-        public PassiveNode right;
+        public PNode left;
+        public PNode right;
         public LinkState linkState;
         public LinkDirection direction;
         public bool mandatory;
@@ -58,12 +59,12 @@ namespace Passive {
             return mandatory ?  LinkState.Mandated : LinkState.Unavailable;
         }
 
-        public LinkDirection GetSide(PassiveNode node) {
+        public LinkDirection GetSide(PNode node) {
             if (node.GetInstanceID() == left.GetInstanceID()) return LinkDirection.Left;
             return LinkDirection.Right;
         }
 
-        public PassiveNode GetLinkedPoint(PassiveNode node) {
+        public PNode GetLinkedPoint(PNode node) {
             if (node.GetInstanceID() == left.GetInstanceID()) return right;
             return left;
         }
@@ -79,22 +80,24 @@ namespace Passive {
             return travels && HasParentTaken();
         }
 
-        public bool IsMandatory(PassiveNode node) {
+        public bool IsMandatory(PNode node) {
             return mandatory && GetSide(node).Flip() == direction;
         }
 
-        public bool IsDependant(PassiveNode node) {
+        public bool IsDependant(PNode node) {
             return mandatory && GetSide(node) == direction;
         }
 
     }
 
+    [Serializable]
     public enum LinkDirection {
         None,
         Left,
         Right,
     }
 
+    [Serializable]
     public enum LinkState {
         Unavailable,
         Available,
